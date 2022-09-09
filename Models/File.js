@@ -5,8 +5,9 @@ const Schema = mongoose.Schema;
 
 const fileSchema = new Schema({
   phoneNumber: { type: String, required: true },
-  emiratesId: { type: String, required: true, unique: true },
-  fileNumber: { type: String, unique: true },
+  countryCode: { type: String },
+  emiratesId: { type: String, required: true },
+  fileNumber: { type: String },
   password: { type: String, required: true },
   familyMembers: { type: Array },
   clinicVerified: { type: Boolean, default: false },

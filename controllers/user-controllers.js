@@ -6,7 +6,7 @@ var CryptoJS = require("crypto-js");
 const Cryptr = require("cryptr");
 const cryptr = new Cryptr("myTotallySecretKey");
 const { encrypt, decrypt, randomKey } = require("lab46-encrypt");
-const { JWTKEY } = require("../Config/config");
+const { JWTKEY, SMTPPASS } = require("../Config/config");
 
 var KEY = "qwertyuiopasdfghjklzxcvbnm123456";
 
@@ -16,7 +16,7 @@ const File = require("../Models/File");
 const Filephoneverified = require("../Models/Filephoneverification");
 
 const accountSid = "AC05d6ccacda0201d3e850b4ce60c773af";
-const authToken = "cc306492d86211c72c259ed8a24e386f";
+const authToken = "46a1fa44c1a4d0e3decf61879bd1c1e2";
 const client = require("twilio")(accountSid, authToken);
 
 const getUsers = async (req, res, next) => {
@@ -72,20 +72,13 @@ const signup = async (req, res, next) => {
       // var originalText = bytes.toString(CryptoJS.enc.Utf8);
 
       if (existingUser) {
-        // res.json({
-        //   success: false,
-        //   message: "You are an Existing User",
-        // });
-        // return;
         throw new Error("User Already Exist");
       }
-      // } catch (err) {
-      // res.json({
-      //   success: false,
-      //   data: err,
-      //   message: "Signing up failed, please try again later.",
-      // });
-      // }
+
+      let userPhoneExist = await File.findOne({ phoneNumber: phoneNumber });
+      if (userPhoneExist) {
+        throw new Error("User Phone Already Exist");
+      }
 
       // let hashedEmail;
       // let hashedphoneNumber;
@@ -141,6 +134,7 @@ const signup = async (req, res, next) => {
         phoneNumber: phoneNumber,
         emiratesId: emiratesId,
         role,
+        countryCode,
       });
 
       const createdFile = new File({
@@ -149,6 +143,7 @@ const signup = async (req, res, next) => {
         password: hashedpassword,
         clinicVerified: false,
         phoneVerified: false,
+        countryCode: countryCode,
       });
 
       createdUser.save((err) => {
@@ -158,6 +153,7 @@ const signup = async (req, res, next) => {
           // console.log({ message: "user created", createdUser });
           createdFile.save(async (err) => {
             if (err) {
+              console.log(err);
               throw new Error("Error creating the User");
             } else {
               sendPhoneOtp(phoneNumber, otp);
@@ -316,6 +312,7 @@ const signup = async (req, res, next) => {
           phoneNumber: phoneNumber,
           emiratesId: emiratesId,
           role,
+          countryCode,
         });
 
         createdUser.save(async (err) => {
@@ -399,7 +396,7 @@ const sendEmailOtp = (email, otp) => {
       service: "gmail",
       auth: {
         user: "appoloniaapp@gmail.com", // generated ethereal user
-        pass: "mxnqbnuiaradsmxe", // generated ethereal password
+        pass: SMTPPASS, // generated ethereal password
       },
     });
 

@@ -4,4 +4,5 @@ dotenv.config();
 module.exports = {
   db: process.env.DB,
   JWTKEY: process.env.JWT,
+  SMTPPASS: process.env.SMTPPASS,
 };

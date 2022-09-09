@@ -8,7 +8,8 @@ const userSchema = new Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true },
   phoneNumber: { type: String, required: true },
-  emiratesId: { type: String, required: true, unique: true },
+  countryCode: { type: String },
+  emiratesId: { type: String, required: true },
   // role: {
   //   type: Schema.Types.ObjectId,
   //   ref: "Role",
