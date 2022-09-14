@@ -4,6 +4,8 @@ const bodyParser = require("body-parser");
 const app = express();
 
 const usersRoutes = require("./Routes/User-routes");
+const fileRoutes = require("./Routes/File-routes");
+const settingRoutes = require("./Routes/Setting-routes");
 
 const PORT = process.env.PORT || 3001;
 const { db } = require("./Config/config");
@@ -38,6 +40,8 @@ app.use((req, res, next) => {
 });
 
 app.use("/api/user", usersRoutes);
+app.use("/api/file", fileRoutes);
+app.use("/api/setting", settingRoutes);
 
 app.listen(PORT, () => {
   console.log("listening on " + PORT);

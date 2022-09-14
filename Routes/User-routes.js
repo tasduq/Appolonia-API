@@ -7,7 +7,8 @@ const router = express.Router();
 // router.get("/", usersController.getUsers);
 
 router.post("/signup", usersController.signup);
-router.post("/emailverify", usersController.emailVerify);
+router.post("/checkpatient", usersController.checkPatient);
+router.post("/phoneverify", usersController.emailVerify);
 router.post("/fileverify", usersController.fileVerify);
 // router.post("/newotp", usersController.requestNewEmailOtp);
 

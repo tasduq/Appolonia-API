@@ -14,6 +14,9 @@ const userSchema = new Schema({
   //   type: Schema.Types.ObjectId,
   //   ref: "Role",
   // },
+  gender: { type: String },
+  city: { type: String },
+  dob: { type: String },
   role: {
     type: String,
   },
@@ -22,6 +25,7 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+  uniqueId: { type: String },
 });
 
 // userSchema.plugin(uniqueValidator);

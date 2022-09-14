@@ -6,7 +6,7 @@ var CryptoJS = require("crypto-js");
 const Cryptr = require("cryptr");
 const cryptr = new Cryptr("myTotallySecretKey");
 const { encrypt, decrypt, randomKey } = require("lab46-encrypt");
-const { JWTKEY, SMTPPASS } = require("../Config/config");
+const { JWTKEY, SMTPPASS, accountSid, authToken } = require("../Config/config");
 
 var KEY = "qwertyuiopasdfghjklzxcvbnm123456";
 
@@ -15,8 +15,8 @@ const Role = require("../Models/Role");
 const File = require("../Models/File");
 const Filephoneverified = require("../Models/Filephoneverification");
 
-const accountSid = "AC05d6ccacda0201d3e850b4ce60c773af";
-const authToken = "46a1fa44c1a4d0e3decf61879bd1c1e2";
+// const accountSid = "AC05d6ccacda0201d3e850b4ce60c773af";
+// const authToken = "5f7f59ab3a6bdf8fcc2d810e6be45f98";
 const client = require("twilio")(accountSid, authToken);
 
 const getUsers = async (req, res, next) => {
@@ -28,6 +28,83 @@ const getUsers = async (req, res, next) => {
     return;
   }
   res.json({ users: users });
+};
+
+const checkPatient = async (req, res) => {
+  console.log(req.body);
+  const { isFileNumber, fileNumber, emiratesId } = req.body;
+
+  let otp = otpGenerator.generate(4, {
+    upperCase: false,
+    specialChars: false,
+    alphabets: true,
+  });
+  if (!otp) {
+    throw new Error("Error Genrating OTP");
+  }
+  try {
+    if (isFileNumber === 1) {
+      fileExist = await File.findOne({
+        uniqueId: fileNumber,
+        clinicVerified: true,
+      });
+      if (!fileExist) {
+        throw new Error("No account is registered with that File Number");
+      } else {
+        sendPhoneOtp(fileExist.phoneNumber, otp);
+        // sendEmailOtp(email, otp);'
+
+        const createdFilephoneverification = new Filephoneverified({
+          otp: otp,
+          fileId: fileExist._id,
+        });
+
+        createdFilephoneverification.save((err) => {
+          if (err) {
+            throw new Error("Error saving the OTP");
+          } else {
+            res.json({
+              success: true,
+              fileId: fileExist._id,
+              message:
+                "We have sent the OTP to the number and email associated to that account",
+            });
+          }
+        });
+      }
+    } else {
+      fileExist = await File.findOne({
+        emiratesId: emiratesId,
+        clinicVerified: true,
+      });
+      if (!fileExist) {
+        throw new Error("No account is registered with that Emirates Id");
+      } else {
+        sendPhoneOtp(fileExist.phoneNumber, otp);
+        // sendEmailOtp(email, otp);
+
+        const createdFilephoneverification = new Filephoneverified({
+          otp: otp,
+          fileId: fileExist._id,
+        });
+
+        createdFilephoneverification.save((err) => {
+          if (err) {
+            throw new Error("Error saving the OTP");
+          } else {
+            res.json({
+              success: true,
+              fileId: fileExist._id,
+              message:
+                "We have sent the OTP to the number and email associated to that account",
+            });
+          }
+        });
+      }
+    }
+  } catch (err) {
+    res.json({ success: false, message: err.message });
+  }
 };
 
 const signup = async (req, res, next) => {
@@ -42,34 +119,16 @@ const signup = async (req, res, next) => {
     type,
     fileNumber,
     password,
+    city,
+    gender,
+    isSignupWithFileNumber,
+    fileId,
   } = req.body;
   console.log(req.body);
 
   if (type === 1) {
     try {
-      // try {
-
-      // let hashedemairatesId = CryptoJS.AES.encrypt(
-      //   emiratesId,
-      //   "love"
-      // ).toString();
-      // let hashedemairatesId = cryptr.encrypt(emiratesId);
-      // console.log(hashedemairatesId, "i am emirates Id");
-      // const decryptedString = cryptr.decrypt(hashedemairatesId);
-      // console.log(decryptedString, "decryypted");
-
-      // let hashedemairatesId = encrypt({
-      //   data: emiratesId,
-      //   KEY,
-      // });
-      // console.log(hashedemairatesId, "i am emirates Id");
-      // const decryptedData = decrypt({ data: hashedemairatesId, KEY });
-      // console.log(decryptedData, "decrypted Data");
-
-      let existingUser = await User.findOne({ emiratesId: emiratesId });
-
-      //       var bytes  = CryptoJS.AES.decrypt(existingUser., 'secret key 123');
-      // var originalText = bytes.toString(CryptoJS.enc.Utf8);
+      let existingUser = await User.findOne({ uniqueId: emiratesId });
 
       if (existingUser) {
         throw new Error("User Already Exist");
@@ -80,38 +139,18 @@ const signup = async (req, res, next) => {
         throw new Error("User Phone Already Exist");
       }
 
-      // let hashedEmail;
-      // let hashedphoneNumber;
-      // // let hashedemiratesId;
+      userPhoneExist = await File.findOne({ emiratesId: emiratesId });
+      if (userPhoneExist) {
+        throw new Error("Emirates Id Already Exist");
+      }
+
+      let hashedemiratesId;
       let hashedpassword;
 
       try {
-        // hashedEmail = CryptoJS.AES.encrypt(email, "love").toString();
-        // hashedphoneNumber = CryptoJS.AES.encrypt(
-        //   phoneNumber,
-        //   "love"
-        // ).toString();
-        // hashedemiratesId = bcrypt.hash(emiratesId, 12);
         hashedpassword = await bcrypt.hash(password, 12);
-        // hashedemairatesId = CryptoJS.AES.encrypt(
-        //   emiratesId,
-        //   "love"
-        // ).toString();
-
-        // [hashedEmail, hashedphoneNumber, hashedemiratesId, hashedpassword] =
-        //   await Promise.all([
-        //     hashedEmail,
-        //     hashedphoneNumber,
-        //     hashedemiratesId,
-        //     hashedpassword,
-        //   ]);
-        // console.log(
-        //   hashedEmail,
-        //   hashedpassword,
-        //   hashedphoneNumber,
-        //   hashedemiratesId,
-        //   "i am hashed user"
-        // );
+        hashedemiratesId = CryptoJS.AES.encrypt(emiratesId, "love").toString();
+        console.log(hashedemiratesId, "i am emirates");
       } catch (err) {
         console.log("Something went wrong while Encrypting Data", err);
 
@@ -132,9 +171,12 @@ const signup = async (req, res, next) => {
         lastName,
         email: email,
         phoneNumber: phoneNumber,
-        emiratesId: emiratesId,
+        emiratesId: hashedemiratesId,
         role,
         countryCode,
+        uniqueId: emiratesId,
+        city,
+        gender,
       });
 
       const createdFile = new File({
@@ -143,11 +185,15 @@ const signup = async (req, res, next) => {
         password: hashedpassword,
         clinicVerified: false,
         phoneVerified: false,
+        activeRequested: false,
+        active: false,
         countryCode: countryCode,
+        city,
       });
 
       createdUser.save((err) => {
         if (err) {
+          console.log(err);
           throw new Error("Error creating the User");
         } else {
           // console.log({ message: "user created", createdUser });
@@ -178,7 +224,7 @@ const signup = async (req, res, next) => {
                     {
                       $push: {
                         familyMembers: {
-                          memberEmiratesId: emiratesId,
+                          memberEmiratesId: hashedemiratesId,
                           connected: false,
                         },
                       },
@@ -214,137 +260,195 @@ const signup = async (req, res, next) => {
     }
   } else {
     try {
-      // try {
+      let fileExist;
+      let hashedpassword = await bcrypt.hash(password, 12);
 
-      if (!fileNumber) {
-        throw new Error("You havn't provided the File Number");
+      fileExist = await File.findOne({ _id: fileId });
+      if (!fileExist) {
+        throw new Error("No account is registered with that File Number");
+      } else {
+        File.updateOne(
+          {
+            _id: fileId,
+          },
+          { $set: { activeRequested: true, password: hashedpassword } },
+          (err) => {
+            if (err) {
+              throw new Error("Somthing went wrong while making request");
+            } else {
+              res.json({
+                success: true,
+                message:
+                  "Thanks for registering with us, our team will review your details and contact you soon to activate your account",
+              });
+            }
+          }
+        );
       }
+      // } else {
+      //   fileExist = await File.findOne({ emiratesId: emiratesId });
+      //   if (!fileExist) {
+      //     throw new Error("No account is registered with that Emirates Id");
+      //   } else {
+      //     File.updateOne(
+      //       {
+      //         emiratesId: emiratesId,
+      //       },
+      //       { $set: { activeRequested: true, password: hashedpassword } },
+      //       (err) => {
+      //         if (err) {
+      //           throw new Error("Somthing went wrong while making request");
+      //         } else {
+      //           res.json({
+      //             success: true,
+      //             message:
+      //               "Thanks for registering with us, our team will review your details and contact you soon to activate your account",
+      //           });
+      //         }
+      //       }
+      //     );
+      //   }
+      // }
+
+      // if (!fileNumber) {
+      //   throw new Error("You havn't provided the File Number");
+      // }
 
       // let hashedfileNumber = CryptoJS.AES.encrypt(
       //   fileNumber,
       //   "love"
       // ).toString();
 
-      let existingFile = await File.findOne({
-        fileNumber: fileNumber,
-        clinicVerified: true,
-      });
+      // if (!existingFile) {
+      //   throw new Error(
+      //     "File Number is not correct or its not got verified by Clinic"
+      //   );
+      // }
 
-      if (!existingFile) {
-        throw new Error("File Number is not correct");
-      }
+      // console.log(existingFile, "i am existing file");
+
+      // let existingFile = await File.updateOne({
+      //   uniqueId: fileNumber,
+      //   clinicVerified: true,
+      // });
 
       // let hashedemiratesId = CryptoJS.AES.encrypt(
       //   emiratesId,
       //   "love"
       // ).toString();
 
-      let existingUser = await User.findOne({ emiratesId: emiratesId });
+      // let existingUser = await User.findOne({ uniqueId: emiratesId });
 
-      if (existingUser) {
-        // res.json({
-        //   success: false,
-        //   message: "You are an Existing User",
-        // });
-        // return;
-        // throw new Error("User Already Exist");
-        File.updateOne(
-          { fileNumber: fileNumber },
-          {
-            $push: {
-              familyMembers: {
-                memberEmiratesId: emiratesId,
-                connected: false,
-              },
-            },
-          },
-          (err) => {
-            if (err) {
-              throw new Error("Error creating the User");
-            } else {
-              res.json({
-                success: true,
-                message: "You would be soon verified by the Clinic",
-              });
-            }
-          }
-        );
-      } else {
-        let hashedEmail;
-        let hashedphoneNumber;
-        // let hashedemiratesId;
-        // let hashedfileNumber;
-        // let hashedpassword;
+      // if (existingUser) {
+      //   let { familyMembers } = existingFile;
+      //   let decryptedFamilyMembers = familyMembers.map((member) => {
+      //     let yoo = member;
+      //     console.log(yoo, "i am yoo");
+      //     let decryptedemiratesId;
+      //     decryptedemiratesId = CryptoJS.AES.decrypt(
+      //       yoo.memberEmiratesId,
+      //       "love"
+      //     );
+      //     decryptedemiratesId = decryptedemiratesId.toString(CryptoJS.enc.Utf8);
+      //     console.log(decryptedemiratesId, "i am decrypted");
+      //     yoo = {
+      //       ...yoo,
+      //       memberEmiratesId: decryptedemiratesId,
+      //     };
+      //     console.log(yoo, "i am yoo");
+      //     return yoo;
+      //   });
 
-        // try {
-        //   // hashedEmail = CryptoJS.AES.encrypt(email, "love").toString();
-        //   // hashedphoneNumber = CryptoJS.AES.encrypt(
-        //   //   phoneNumber,
-        //   //   "love"
-        //   // ).toString();
+      //   console.log(decryptedFamilyMembers, "i am family");
 
-        //   // hashedemiratesId = bcrypt.hash(emiratesId, 12);
-        //   // hashedpassword = await bcrypt.hash(password, 12);
+      //   let foundMember = decryptedFamilyMembers.find(
+      //     (member) => member.memberEmiratesId === emiratesId
+      //   );
 
-        //   // [hashedEmail, hashedphoneNumber, hashedemiratesId] =
-        //   //   await Promise.all([
-        //   //     hashedEmail,
-        //   //     hashedphoneNumber,
-        //   //     hashedemiratesId,
-        //   //   ]);
-        //   // console.log(
-        //   //   hashedEmail,
-        //   //   hashedfileNumber,
-        //   //   hashedphoneNumber,
-        //   //   hashedemiratesId,
-        //   //   "i am hashed user"
-        //   // );
-        // } catch (err) {
-        //   console.log("Something went wrong while Encrypting Data", err);
+      //   if (foundMember) {
+      //     if (foundMember.connected === true) {
+      //       throw new Error("You are already the member of the Family Account");
+      //     } else if (foundMember.connected === false) {
+      //       throw new Error("You have already requested to join the account.");
+      //     } else {
+      //       throw new Error("Somthing went wrong");
+      //     }
+      //   }
 
-        //   throw new Error("Something went wrong while Encrypting Data", err);
-        // }
+      //   File.updateOne(
+      //     { uniqueId: fileNumber },
+      //     {
+      //       $push: {
+      //         familyMembers: {
+      //           memberEmiratesId: hashedemiratesId,
+      //           connected: false,
+      //         },
+      //       },
+      //     },
+      //     (err) => {
+      //       if (err) {
+      //         throw new Error("Error creating the User");
+      //       } else {
+      //         res.json({
+      //           success: true,
+      //           message: "You would be soon verified by the Clinic",
+      //         });
+      //       }
+      //     }
+      //   );
+      // } else {
+      //   let hashedEmail;
+      //   let hashedphoneNumber;
 
-        const createdUser = new User({
-          firstName,
-          lastName,
-          email: email,
-          phoneNumber: phoneNumber,
-          emiratesId: emiratesId,
-          role,
-          countryCode,
-        });
+      //   //   let existingUser = await User.findOne({ uniqueId: emiratesId });
 
-        createdUser.save(async (err) => {
-          if (err) {
-            throw new Error("Error creating the User");
-          } else {
-            // console.log({ message: "user created", createdUser });
-            // let newUser = User.findOne({emirates : })
-            File.updateOne(
-              { fileNumber: fileNumber },
-              {
-                $push: {
-                  familyMembers: {
-                    memberEmiratesId: emiratesId,
-                    connected: false,
-                  },
-                },
-              },
-              (err) => {
-                if (err) {
-                  throw new Error("Error creating the User");
-                } else {
-                  res.json({
-                    success: true,
-                    message: "You would be soon verified by the Clinic",
-                  });
-                }
-              }
-            );
-          }
-        });
-      }
+      //   // if (existingUser) {
+      //   //   throw new Error("User Already Exist");
+      //   // }
+
+      //   const createdUser = new User({
+      //     firstName,
+      //     lastName,
+      //     email: email,
+      //     phoneNumber: phoneNumber,
+      //     emiratesId: hashedemiratesId,
+      //     role,
+      //     countryCode,
+      //     uniqueId: emiratesId,
+      //     city,
+      //     gender,
+      //   });
+
+      //   createdUser.save(async (err) => {
+      //     if (err) {
+      //       throw new Error("Error creating the User");
+      //     } else {
+      //       // console.log({ message: "user created", createdUser });
+      //       // let newUser = User.findOne({emirates : })
+      //       File.updateOne(
+      //         { uniqueId: fileNumber },
+      //         {
+      //           $push: {
+      //             familyMembers: {
+      //               memberEmiratesId: hashedemiratesId,
+      //               connected: false,
+      //             },
+      //           },
+      //         },
+      //         (err) => {
+      //           if (err) {
+      //             throw new Error("Error creating the User");
+      //           } else {
+      //             res.json({
+      //               success: true,
+      //               message: "You would be soon verified by the Clinic",
+      //             });
+      //           }
+      //         }
+      //       );
+      //     }
+      //   });
+      // }
 
       // } catch (err) {
     } catch (err) {
@@ -441,15 +545,31 @@ const emailVerify = async (req, res) => {
           { $set: { phoneVerified: true } },
           function (err) {
             if (err) {
-              throw new Error("Error verifying phone");
+              throw new Error(
+                "Somthing went wrong while verifiying Phone Number"
+              );
             } else {
-              Filephoneverified.deleteOne({ fileId: fileId }, (err) => {
+              Filephoneverified.deleteOne({ fileId: fileId }, async (err) => {
                 if (err) {
                   throw new Error("Error deleting the OTP Session");
                 } else {
+                  let foundFile = await File.findOne({ _id: fileId }, [
+                    "uniqueId",
+                    "city",
+                    "familyMembers",
+                    "emiratesId",
+                    "phoneNumber",
+                  ]);
                   res.json({
                     success: true,
                     message: "Phone Number verified",
+                    fileData: {
+                      fileNumber: foundFile.uniqueId,
+                      city: foundFile.city,
+                      familyMembers: foundFile?.familyMembers?.length,
+                      emiratesId: foundFile.emiratesId,
+                      phoneNumber: foundFile.phoneNumber,
+                    },
                   });
                 }
               });
@@ -473,8 +593,10 @@ const fileVerify = async (req, res) => {
   const { fileNumber, fileId } = req.body;
   let user;
 
+  hashedfileNumber = CryptoJS.AES.encrypt(fileNumber, "love").toString();
+
   try {
-    let isFileExist = await File.findOne({ fileNumber: fileNumber });
+    let isFileExist = await File.findOne({ uniqueId: fileNumber });
     if (isFileExist) {
       throw new Error("File Number already Exist");
     }
@@ -487,7 +609,13 @@ const fileVerify = async (req, res) => {
     if (user) {
       File.updateOne(
         { fileId: fileId },
-        { $set: { clinicVerified: true, fileNumber: fileNumber } },
+        {
+          $set: {
+            clinicVerified: true,
+            fileNumber: hashedfileNumber,
+            uniqueId: fileNumber,
+          },
+        },
         function (err) {
           if (err) {
             throw new Error("Error verifying");
@@ -509,14 +637,15 @@ const fileVerify = async (req, res) => {
 };
 
 const login = async (req, res, next) => {
-  const { fileNumber, password, phoneNumber, type } = req.body;
+  const { fileNumber, password, emiratesId, type } = req.body;
   let existingUser;
 
   // console.log(email, password);
 
   if (type === 1) {
     try {
-      existingUser = await File.findOne({ phoneNumber: phoneNumber });
+      existingUser = await File.findOne({ emiratesId: emiratesId });
+      console.log(existingUser, "i am existing user");
 
       if (!existingUser) {
         throw new Error("Account does not exist");
@@ -526,7 +655,7 @@ const login = async (req, res, next) => {
         }
 
         if (existingUser.phoneVerified === false) {
-          throw new Error("Your have not verified your phone number");
+          throw new Error("You have not verified your phone number");
         }
 
         let isValidPassword = false;
@@ -547,7 +676,7 @@ const login = async (req, res, next) => {
         let access_token;
         try {
           access_token = jwt.sign(
-            { userId: existingUser._id, email: existingUser.phoneNumber },
+            { userId: existingUser._id, emiratesId: existingUser.emiratesId },
             JWTKEY,
             { expiresIn: "1h" }
           );
@@ -568,6 +697,14 @@ const login = async (req, res, next) => {
 
         let familyMembers = await User.find({ emiratesId: { $in: familyIds } });
         console.log(familyMembers, "we are members");
+
+        let decryptedFileNumber;
+        decryptedFileNumber = CryptoJS.AES.decrypt(
+          existingUser.fileNumber,
+          "love"
+        );
+        decryptedFileNumber = decryptedFileNumber.toString(CryptoJS.enc.Utf8);
+        console.log(decryptedFileNumber, "decrupted");
 
         res.json({
           message: "you are login success fully ",
@@ -585,7 +722,7 @@ const login = async (req, res, next) => {
     }
   } else {
     try {
-      existingUser = await File.findOne({ fileNumber: fileNumber });
+      existingUser = await File.findOne({ uniqueId: fileNumber });
 
       if (!existingUser) {
         throw new Error("Account does not exist");
@@ -616,7 +753,7 @@ const login = async (req, res, next) => {
         let access_token;
         try {
           access_token = jwt.sign(
-            { userId: existingUser._id, phoneNumber: existingUser.phoneNumber },
+            { userId: existingUser._id, emiratesId: existingUser.emiratesId },
             JWTKEY,
             { expiresIn: "1h" }
           );
@@ -632,11 +769,21 @@ const login = async (req, res, next) => {
           // }
         });
 
+        //       var bytes  = CryptoJS.AES.decrypt(existingUser., 'secret key 123');
+        // var originalText = bytes.toString(CryptoJS.enc.Utf8);
+
         familyIds = familyIds.map((member) => member.memberEmiratesId);
         console.log(familyIds, "We are family ids");
 
         let familyMembers = await User.find({ emiratesId: { $in: familyIds } });
         console.log(familyMembers, "we are members");
+
+        let decryptedFileNumber;
+        decryptedFileNumber = CryptoJS.AES.decrypt(
+          existingUser.fileNumber,
+          "love"
+        );
+        decryptedFileNumber = decryptedFileNumber.toString(CryptoJS.enc.Utf8);
 
         res.json({
           message: "you are login success fully ",
@@ -749,6 +896,7 @@ const updateUserImage = async (req, res) => {
 module.exports = {
   signup,
   login,
+  checkPatient,
   emailVerify,
   fileVerify,
   // requestNewEmailOtp,

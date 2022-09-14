@@ -4,19 +4,23 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const fileSchema = new Schema({
-  phoneNumber: { type: String, required: true },
+  phoneNumber: { type: String },
   countryCode: { type: String },
-  emiratesId: { type: String, required: true },
+  emiratesId: { type: String },
   fileNumber: { type: String },
-  password: { type: String, required: true },
+  password: { type: String },
   familyMembers: { type: Array },
   clinicVerified: { type: Boolean, default: false },
+  active: { type: Boolean, default: false },
+  activeRequested: { type: Boolean, default: false },
   phoneVerified: { type: Boolean, default: false },
   image: { type: String },
+  city: { type: String },
   created: {
     type: Date,
     default: Date.now,
   },
+  uniqueId: { type: String },
 });
 
 // userSchema.plugin(uniqueValidator);
