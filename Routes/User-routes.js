@@ -21,5 +21,7 @@ router.post("/verifyforgototp", usersController.verifyForgotOtp);
 router.post("/newpasswordforgot", usersController.newPassword);
 
 router.post("/contact", upload.array("files"), usersController.contact);
+router.post("/profileget", usersController.getUserdata);
+router.post("/changepassword", usersController.changePassword);
 
 module.exports = router;

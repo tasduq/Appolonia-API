@@ -5,6 +5,8 @@ const app = express();
 
 const usersRoutes = require("./Routes/User-routes");
 const fileRoutes = require("./Routes/File-routes");
+const scansRoutes = require("./Routes/Scans-routes");
+
 const settingRoutes = require("./Routes/Setting-routes");
 
 const PORT = process.env.PORT || 3001;
@@ -42,6 +44,7 @@ app.use((req, res, next) => {
 app.use("/api/user", usersRoutes);
 app.use("/api/file", fileRoutes);
 app.use("/api/setting", settingRoutes);
+app.use("/api/scans", scansRoutes);
 
 app.listen(PORT, () => {
   console.log("listening on " + PORT);

@@ -47,9 +47,12 @@ const checkPatient = async (req, res) => {
   const { isFileNumber, fileNumber, emiratesId } = req.body;
 
   let otp = otpGenerator.generate(4, {
-    upperCase: false,
+    // upperCase: false,
+    // specialChars: false,
+    // alphabets: false,
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
     specialChars: false,
-    alphabets: false,
   });
   if (!otp) {
     throw new Error("Error Genrating OTP");
@@ -181,9 +184,12 @@ const signup = async (req, res, next) => {
       }
 
       let otp = otpGenerator.generate(4, {
-        upperCase: false,
+        // upperCase: false,
+        // specialChars: false,
+        // alphabets: false,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
         specialChars: false,
-        alphabets: false,
       });
       if (!otp) {
         throw new Error("Error Genrating OTP");
@@ -919,6 +925,62 @@ const newPassword = async (req, res) => {
   }
 };
 
+const changePassword = async (req, res) => {
+  console.log(req.body);
+
+  const { passwordUpdate, id } = req.body;
+  const { oldPassword, newPassword } = passwordUpdate;
+
+  let existingUser;
+
+  try {
+    existingUser = await File.findOne({ _id: id });
+    console.log(existingUser);
+    if (!existingUser) {
+      throw new Error("Account not found");
+    }
+
+    let isValidPassword = false;
+    try {
+      isValidPassword = await bcrypt.compare(
+        oldPassword,
+        existingUser.password
+      );
+      console.log(isValidPassword);
+    } catch (err) {
+      throw new Error("Something went wrong");
+    }
+
+    if (isValidPassword) {
+      let hashedPassword;
+      try {
+        hashedPassword = await bcrypt.hash(newPassword, 12);
+      } catch (err) {
+        console.log("Error hashing password", err);
+
+        throw new Error("Error hashing password");
+      }
+
+      File.updateOne(
+        { _id: id },
+        { $set: { password: hashedPassword } },
+        function (err) {
+          if (!err) {
+            return res.json({ success: true, message: "Password Updated" });
+          }
+        }
+      );
+    } else {
+      throw new Error("Wrong old Password");
+    }
+  } catch (err) {
+    res.json({
+      errorCode: 0,
+      message: err.message,
+    });
+  }
+};
+
 const requestNewOtp = async (req, res) => {
   console.log(req.body);
   const { phoneNumber } = req.body;
@@ -931,9 +993,12 @@ const requestNewOtp = async (req, res) => {
     return;
   }
   let otp = otpGenerator.generate(4, {
-    upperCase: false,
+    // upperCase: false,
+    // specialChars: false,
+    // alphabets: false,
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
     specialChars: false,
-    alphabets: false,
   });
   sendPhoneOtp(phoneNumber, otp);
 
@@ -953,9 +1018,12 @@ const requestForgotOtp = async (req, res) => {
     return;
   }
   let otp = otpGenerator.generate(4, {
-    upperCase: false,
+    // upperCase: false,
+    // specialChars: false,
+    // alphabets: false,
+    lowerCaseAlphabets: false,
+    upperCaseAlphabets: false,
     specialChars: false,
-    alphabets: false,
   });
 
   let foundForgotPhone = await Forgotphoneverified.findOne({
@@ -1079,15 +1147,12 @@ module.exports = {
   checkPatient,
   emailVerify,
   fileVerify,
-  // requestNewEmailOtp,
   newPassword,
   getUsers,
-  // deleteUsers,
-  // editBio,
-  // editUserInfo,
-  // updateUserImage,
   requestNewOtp,
   requestForgotOtp,
   verifyForgotOtp,
   contact,
+  getUserdata,
+  changePassword,
 };
