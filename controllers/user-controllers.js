@@ -14,6 +14,7 @@ const User = require("../Models/User");
 const Role = require("../Models/Role");
 const File = require("../Models/File");
 const Filephoneverified = require("../Models/Filephoneverification");
+const Forgotphoneverified = require("../Models/Forgotphonrverification");
 
 // const accountSid = "AC05d6ccacda0201d3e850b4ce60c773af";
 // const authToken = "5f7f59ab3a6bdf8fcc2d810e6be45f98";
@@ -37,7 +38,7 @@ const checkPatient = async (req, res) => {
   let otp = otpGenerator.generate(4, {
     upperCase: false,
     specialChars: false,
-    alphabets: true,
+    alphabets: false,
   });
   if (!otp) {
     throw new Error("Error Genrating OTP");
@@ -160,7 +161,7 @@ const signup = async (req, res, next) => {
       let otp = otpGenerator.generate(4, {
         upperCase: false,
         specialChars: false,
-        alphabets: true,
+        alphabets: false,
       });
       if (!otp) {
         throw new Error("Error Genrating OTP");
@@ -564,11 +565,12 @@ const emailVerify = async (req, res) => {
                     success: true,
                     message: "Phone Number verified",
                     fileData: {
-                      fileNumber: foundFile.uniqueId,
-                      city: foundFile.city,
-                      familyMembers: foundFile?.familyMembers?.length,
-                      emiratesId: foundFile.emiratesId,
-                      phoneNumber: foundFile.phoneNumber,
+                      // fileNumber: foundFile.uniqueId,
+                      // city: foundFile.city,
+                      // familyMembers: foundFile?.familyMembers?.length,
+                      // emiratesId: foundFile.emiratesId,
+                      // phoneNumber: foundFile.phoneNumber,
+                      fileId: foundFile._id,
                     },
                   });
                 }
@@ -654,6 +656,12 @@ const login = async (req, res, next) => {
           throw new Error("Your account has not verified from the clinic yet");
         }
 
+        if (existingUser.active === false) {
+          throw new Error(
+            "Your account has not been activated from the clinic yet"
+          );
+        }
+
         if (existingUser.phoneVerified === false) {
           throw new Error("You have not verified your phone number");
         }
@@ -731,6 +739,16 @@ const login = async (req, res, next) => {
           throw new Error("Your account has not verified from the clinic yet");
         }
 
+        if (existingUser.active === false) {
+          throw new Error(
+            "Your account has not been activated from the clinic yet"
+          );
+        }
+
+        if (existingUser.phoneVerified === false) {
+          throw new Error("You have not verified your phone number");
+        }
+
         if (existingUser.phoneVerified === false) {
           throw new Error("Your have not verified your phone number");
         }
@@ -769,21 +787,18 @@ const login = async (req, res, next) => {
           // }
         });
 
-        //       var bytes  = CryptoJS.AES.decrypt(existingUser., 'secret key 123');
-        // var originalText = bytes.toString(CryptoJS.enc.Utf8);
-
         familyIds = familyIds.map((member) => member.memberEmiratesId);
         console.log(familyIds, "We are family ids");
 
         let familyMembers = await User.find({ emiratesId: { $in: familyIds } });
         console.log(familyMembers, "we are members");
 
-        let decryptedFileNumber;
-        decryptedFileNumber = CryptoJS.AES.decrypt(
-          existingUser.fileNumber,
-          "love"
-        );
-        decryptedFileNumber = decryptedFileNumber.toString(CryptoJS.enc.Utf8);
+        // let decryptedFileNumber;
+        // decryptedFileNumber = CryptoJS.AES.decrypt(
+        //   existingUser.fileNumber,
+        //   "love"
+        // );
+        // decryptedFileNumber = decryptedFileNumber.toString(CryptoJS.enc.Utf8);
 
         res.json({
           message: "you are login success fully ",
@@ -805,10 +820,10 @@ const login = async (req, res, next) => {
 const newPassword = async (req, res) => {
   console.log(req.body);
 
-  const { newPassword, email, recentOtp } = req.body;
-  console.log(newPassword, email, recentOtp, "details");
+  const { newPassword, fileId, recentOtp } = req.body;
+  console.log(newPassword, fileId, recentOtp, "details");
 
-  if (newPassword && email && recentOtp) {
+  if (newPassword && fileId && recentOtp) {
     let hashedPassword;
     try {
       hashedPassword = await bcrypt.hash(newPassword, 12);
@@ -826,17 +841,33 @@ const newPassword = async (req, res) => {
     // console.log(hashedPassword);
 
     try {
-      let user = await User.findOne({ email: email }, "-password");
+      let user = await Forgotphoneverified.findOne(
+        { fileId: fileId },
+        "-password"
+      );
       console.log(user);
       if (user) {
-        if (user.emailVerificationCode === recentOtp) {
-          User.updateOne(
-            { email: email },
+        if (user.otp === recentOtp) {
+          File.updateOne(
+            { _id: fileId },
             { $set: { password: hashedPassword } },
             function (err) {
               if (!err) {
                 console.log("Updated");
-                return res.json({ success: true, message: "Password Updated" });
+                Forgotphoneverified.deleteOne(
+                  { fileId: fileId },
+                  async (err) => {
+                    if (err) {
+                      throw new Error("Error deleting the OTP Session");
+                    } else {
+                      console.log("deleted previous");
+                      return res.json({
+                        success: true,
+                        message: "Password Updated",
+                      });
+                    }
+                  }
+                );
               } else {
                 // console.log(err);
                 res.json({
@@ -866,30 +897,111 @@ const newPassword = async (req, res) => {
   }
 };
 
-const updateUserImage = async (req, res) => {
-  const { id, image } = req.body;
-
-  if (id && image) {
-    User.updateOne({ _id: id }, { $set: { image, image } }, function (err) {
-      if (!err) {
-        console.log("User Image Updated");
-        return res.json({
-          success: true,
-          message: "User Image Updated",
-        });
-      } else {
-        res.json({
-          success: false,
-          message: "Something went wrong",
-        });
-        return;
-      }
-    });
-  } else {
+const requestNewOtp = async (req, res) => {
+  console.log(req.body);
+  const { phoneNumber } = req.body;
+  let phoneExist = await File.findOne({ phoneNumber: phoneNumber }, "_id");
+  if (!phoneExist) {
     res.json({
       success: false,
-      message: "Id and Image needed",
+      message: "Phonenumber is not registered with us",
     });
+    return;
+  }
+  let otp = otpGenerator.generate(4, {
+    upperCase: false,
+    specialChars: false,
+    alphabets: false,
+  });
+  sendPhoneOtp(phoneNumber, otp);
+
+  res.json({ success: true, message: "OTP Sent to Phone Number" });
+  return;
+};
+
+const requestForgotOtp = async (req, res) => {
+  console.log(req.body);
+  const { phoneNumber } = req.body;
+  let phoneExist = await File.findOne({ phoneNumber: phoneNumber }, "_id");
+  if (!phoneExist) {
+    res.json({
+      success: false,
+      message: "Phonenumber is not registered with us",
+    });
+    return;
+  }
+  let otp = otpGenerator.generate(4, {
+    upperCase: false,
+    specialChars: false,
+    alphabets: false,
+  });
+
+  let foundForgotPhone = await Forgotphoneverified.findOne({
+    fileId: phoneExist._id,
+  });
+
+  if (foundForgotPhone) {
+    Forgotphoneverified.deleteOne({ fileId: phoneExist._id }, async (err) => {
+      if (err) {
+        throw new Error("Error deleting the OTP Session");
+      } else {
+        console.log("deleted previous");
+      }
+    });
+  }
+
+  console.log(phoneExist);
+  let createdForgotOtp = await Forgotphoneverified({
+    otp: otp,
+    fileId: phoneExist._id,
+    created: Date.now(),
+    expires: Date.now() + 600000,
+  });
+
+  createdForgotOtp.save((err) => {
+    if (err) {
+      console.log(err),
+        res.json({
+          success: false,
+          message: "Somthing went wrong",
+        });
+    } else {
+      sendPhoneOtp(phoneNumber, otp);
+      res.json({
+        success: true,
+        message: "OTP Sent to Phone Number",
+        fileId: phoneExist._id,
+      });
+    }
+  });
+
+  return;
+};
+
+const verifyForgotOtp = async (req, res) => {
+  console.log(req.body);
+  const { otp, fileId } = req.body;
+
+  let found = await Forgotphoneverified.findOne({ fileId: fileId });
+  console.log(found);
+  if (found) {
+    if (found.expires > Date.now()) {
+      if (found.otp === otp) {
+        res.json({
+          success: true,
+          message: "OTP got verified",
+        });
+      } else {
+        res.json({ success: false, message: "OTP is wrong" });
+      }
+    } else {
+      res.json({
+        success: false,
+        message: "OTP got expired. Request the new one",
+      });
+    }
+  } else {
+    res.json({ success: false, message: "Kindly request the OTP Again" });
   }
 };
 
@@ -905,5 +1017,8 @@ module.exports = {
   // deleteUsers,
   // editBio,
   // editUserInfo,
-  updateUserImage,
+  // updateUserImage,
+  requestNewOtp,
+  requestForgotOtp,
+  verifyForgotOtp,
 };

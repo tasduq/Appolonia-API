@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const filePhoneVerificationSchema = new Schema({
-  otp: { type: String, required: true },
+const forgotPhoneVerificationSchema = new Schema({
+  otp: { type: String },
   fileId: {
     type: String,
   },
@@ -20,6 +20,6 @@ const filePhoneVerificationSchema = new Schema({
 // roleSchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model(
-  "Filephoneverfication",
-  filePhoneVerificationSchema
+  "Forgotphoneverfication",
+  forgotPhoneVerificationSchema
 );
