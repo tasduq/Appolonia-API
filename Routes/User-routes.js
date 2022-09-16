@@ -1,6 +1,8 @@
 const express = require("express");
 
 const usersController = require("../controllers/user-controllers");
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
 
 const router = express.Router();
 
@@ -18,8 +20,6 @@ router.post("/newotp", usersController.requestNewOtp);
 router.post("/verifyforgototp", usersController.verifyForgotOtp);
 router.post("/newpasswordforgot", usersController.newPassword);
 
-// router.post("/editbio", usersController.editBio);
-// router.post("/edituserinfo", usersController.editUserInfo);
-// router.post("/edituserimage", usersController.updateUserImage);
+router.post("/contact", upload.array("files"), usersController.contact);
 
 module.exports = router;

@@ -13,6 +13,7 @@ var KEY = "qwertyuiopasdfghjklzxcvbnm123456";
 const User = require("../Models/User");
 const Role = require("../Models/Role");
 const File = require("../Models/File");
+const Contact = require("../Models/Contact");
 const Filephoneverified = require("../Models/Filephoneverification");
 const Forgotphoneverified = require("../Models/Forgotphonrverification");
 
@@ -29,6 +30,16 @@ const getUsers = async (req, res, next) => {
     return;
   }
   res.json({ users: users });
+};
+
+const getUserdata = async (req, res) => {
+  const { userId } = req.body;
+  const foundUser = await User.findOne({ _id: userId });
+  if (foundUser) {
+    res.json({ success: true, message: "User found", userData: foundUser });
+  } else {
+    res.json({ success: false, message: "User not found" });
+  }
 };
 
 const checkPatient = async (req, res) => {
@@ -65,10 +76,13 @@ const checkPatient = async (req, res) => {
             throw new Error("Error saving the OTP");
           } else {
             res.json({
-              success: true,
-              fileId: fileExist._id,
-              message:
-                "We have sent the OTP to the number and email associated to that account",
+              ErrorCode: 1,
+              Data: {
+                success: true,
+                fileId: fileExist._id,
+                message:
+                  "We have sent the OTP to the number and email associated to that account",
+              },
             });
           }
         });
@@ -78,6 +92,7 @@ const checkPatient = async (req, res) => {
         emiratesId: emiratesId,
         clinicVerified: true,
       });
+      console.log(fileExist, "fileexist");
       if (!fileExist) {
         throw new Error("No account is registered with that Emirates Id");
       } else {
@@ -94,17 +109,24 @@ const checkPatient = async (req, res) => {
             throw new Error("Error saving the OTP");
           } else {
             res.json({
-              success: true,
-              fileId: fileExist._id,
-              message:
-                "We have sent the OTP to the number and email associated to that account",
+              ErrorCode: 1,
+              Data: {
+                success: true,
+                fileId: fileExist._id,
+                message:
+                  "We have sent the OTP to the number and email associated to that account",
+              },
             });
           }
         });
       }
     }
   } catch (err) {
-    res.json({ success: false, message: err.message });
+    // res.json({ success: false, message: err.message });
+    res.json({
+      ErrorCode: 0,
+      Data: { success: false, message: err.message },
+    });
   }
 };
 
@@ -1005,6 +1027,52 @@ const verifyForgotOtp = async (req, res) => {
   }
 };
 
+const contact = async (req, res) => {
+  console.log(req.files);
+  if (req.files.length === 0) {
+    res.json({ success: false, message: "Files not selecteds" });
+    return;
+  }
+  let filesName = req.files.map((file) => file.filename);
+  console.log(req.body.name);
+  const {
+    name,
+    contactInfo,
+    subject,
+    message,
+    appVersion,
+    appOsVersion,
+    source,
+  } = req.body;
+
+  let savedContact = new Contact({
+    name,
+    contactInfo,
+    subject,
+    message,
+    appVersion,
+    appOsVersion,
+    source,
+    files: filesName,
+  });
+
+  savedContact.save((err) => {
+    if (err) {
+      console.log(err);
+      res.json({
+        success: false,
+        message: "Somthing went wrong while saving the contact info",
+      });
+    } else {
+      res.json({
+        success: true,
+        message:
+          "We have received your message and will respond within 24-48 Hrs",
+      });
+    }
+  });
+};
+
 module.exports = {
   signup,
   login,
@@ -1021,4 +1089,5 @@ module.exports = {
   requestNewOtp,
   requestForgotOtp,
   verifyForgotOtp,
+  contact,
 };
