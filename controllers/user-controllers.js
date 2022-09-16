@@ -76,7 +76,7 @@ const checkPatient = async (req, res) => {
             throw new Error("Error saving the OTP");
           } else {
             res.json({
-              ErrorCode: 1,
+              errorCode: 1,
               Data: {
                 success: true,
                 fileId: fileExist._id,
@@ -109,7 +109,7 @@ const checkPatient = async (req, res) => {
             throw new Error("Error saving the OTP");
           } else {
             res.json({
-              ErrorCode: 1,
+              errorCode: 1,
               Data: {
                 success: true,
                 fileId: fileExist._id,
@@ -124,7 +124,7 @@ const checkPatient = async (req, res) => {
   } catch (err) {
     // res.json({ success: false, message: err.message });
     res.json({
-      ErrorCode: 0,
+      errorCode: 0,
       Data: { success: false, message: err.message },
     });
   }
