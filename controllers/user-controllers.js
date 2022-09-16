@@ -64,7 +64,13 @@ const checkPatient = async (req, res) => {
         clinicVerified: true,
       });
       if (!fileExist) {
-        throw new Error("No account is registered with that File Number");
+        // throw new Error("No account is registered with that File Number");
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "No account is registered with that File Number",
+        });
+        return;
       } else {
         sendPhoneOtp(fileExist.phoneNumber, otp);
         // sendEmailOtp(email, otp);'
@@ -78,15 +84,25 @@ const checkPatient = async (req, res) => {
           if (err) {
             throw new Error("Error saving the OTP");
           } else {
+            // res.json({
+            //   errorCode: 1,
+            //   Data: {
+            //     success: true,
+            //     fileId: fileExist._id,
+            //     message:
+            //       "We have sent the OTP to the number and email associated to that account",
+            //   },
+            // });
             res.json({
-              errorCode: 1,
-              Data: {
-                success: true,
+              serverError: 0,
+              success: 1,
+              message:
+                "We have sent the OTP to the number and email associated to that account",
+              data: {
                 fileId: fileExist._id,
-                message:
-                  "We have sent the OTP to the number and email associated to that account",
               },
             });
+            return;
           }
         });
       }
@@ -97,7 +113,13 @@ const checkPatient = async (req, res) => {
       });
       console.log(fileExist, "fileexist");
       if (!fileExist) {
-        throw new Error("No account is registered with that Emirates Id");
+        // throw new Error("No account is registered with that Emirates Id");
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "No account is registered with that Emirates Id",
+        });
+        return;
       } else {
         sendPhoneOtp(fileExist.phoneNumber, otp);
         // sendEmailOtp(email, otp);
@@ -111,25 +133,43 @@ const checkPatient = async (req, res) => {
           if (err) {
             throw new Error("Error saving the OTP");
           } else {
+            // res.json({
+            //   errorCode: 1,
+            //   Data: {
+            //     success: true,
+            //     fileId: fileExist._id,
+            //     message:
+            //       "We have sent the OTP to the number and email associated to that account",
+            //   },
+            // });
             res.json({
-              errorCode: 1,
-              Data: {
-                success: true,
+              serverError: 0,
+              success: 1,
+              message:
+                "We have sent the OTP to the number and email associated to that account",
+              data: {
                 fileId: fileExist._id,
-                message:
-                  "We have sent the OTP to the number and email associated to that account",
               },
             });
+            return;
           }
         });
       }
     }
   } catch (err) {
     // res.json({ success: false, message: err.message });
+    // res.json({
+    //   errorCode: 1,
+    //   success: 0,
+    //   Data: { success: false, message: err.message },
+    // });
+    // return;
     res.json({
-      errorCode: 0,
-      Data: { success: false, message: err.message },
+      serverError: 1,
+      success: 0,
+      message: err.message,
     });
+    return;
   }
 };
 
@@ -157,17 +197,35 @@ const signup = async (req, res, next) => {
       let existingUser = await User.findOne({ uniqueId: emiratesId });
 
       if (existingUser) {
-        throw new Error("User Already Exist");
+        // throw new Error("User Already Exist");
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "User Already Exist",
+        });
+        return;
       }
 
       let userPhoneExist = await File.findOne({ phoneNumber: phoneNumber });
       if (userPhoneExist) {
-        throw new Error("User Phone Already Exist");
+        // throw new Error("User Phone Already Exist");
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "User Phone Already Exist",
+        });
+        return;
       }
 
       userPhoneExist = await File.findOne({ emiratesId: emiratesId });
       if (userPhoneExist) {
-        throw new Error("Emirates Id Already Exist");
+        // throw new Error("Emirates Id Already Exist");
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "Emirates Id Already Exist",
+        });
+        return;
       }
 
       let hashedemiratesId;
@@ -262,14 +320,24 @@ const signup = async (req, res, next) => {
                       if (err) {
                         throw new Error("Error creating the User");
                       } else {
+                        // res.json({
+                        //   message:
+                        //     "Registration Successful. You would be notified from the clinic soon",
+                        //   success: true,
+                        //   responseData: {
+                        //     fileId: latestFile._id,
+                        //   },
+                        // });
                         res.json({
+                          serverError: 0,
+                          success: 1,
                           message:
                             "Registration Successful. You would be notified from the clinic soon",
-                          success: true,
-                          responseData: {
+                          data: {
                             fileId: latestFile._id,
                           },
                         });
+                        return;
                       }
                     }
                   );
@@ -294,7 +362,13 @@ const signup = async (req, res, next) => {
 
       fileExist = await File.findOne({ _id: fileId });
       if (!fileExist) {
-        throw new Error("No account is registered with that File Number");
+        // throw new Error("No account is registered with that File Number");
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "No account is registered with that File Number",
+        });
+        return;
       } else {
         File.updateOne(
           {
@@ -305,11 +379,18 @@ const signup = async (req, res, next) => {
             if (err) {
               throw new Error("Somthing went wrong while making request");
             } else {
+              // res.json({
+              //   success: true,
+              //   message:
+              //     "Thanks for registering with us, our team will review your details and contact you soon to activate your account",
+              // });
               res.json({
-                success: true,
+                serverError: 0,
+                success: 1,
                 message:
                   "Thanks for registering with us, our team will review your details and contact you soon to activate your account",
               });
+              return;
             }
           }
         );
@@ -482,10 +563,16 @@ const signup = async (req, res, next) => {
       // } catch (err) {
     } catch (err) {
       console.log(err, "i am error");
+      // res.json({
+      //   success: false,
+      //   message: err.message,
+      // });
       res.json({
-        success: false,
+        serverError: 1,
+        success: 0,
         message: err.message,
       });
+      return;
     }
   }
 };
@@ -502,7 +589,7 @@ const sendPhoneOtp = async (phone, otp) => {
       body: `Your Verification OTP is ${otp}`,
       from: "+18586306724",
     })
-    .then((message) => console.log(message.sid))
+    .then((message) => console.log(message))
     .done();
 
   console.log(res);
@@ -589,32 +676,53 @@ const emailVerify = async (req, res) => {
                     "emiratesId",
                     "phoneNumber",
                   ]);
+                  // res.json({
+                  //   success: true,
+                  //   message: "Phone Number verified",
+                  //   fileData: {
+                  //     // fileNumber: foundFile.uniqueId,
+                  //     // city: foundFile.city,
+                  //     // familyMembers: foundFile?.familyMembers?.length,
+                  //     // emiratesId: foundFile.emiratesId,
+                  //     // phoneNumber: foundFile.phoneNumber,
+                  //     fileId: foundFile._id,
+                  //   },
+                  // });
                   res.json({
-                    success: true,
+                    serverError: 0,
+                    success: 1,
                     message: "Phone Number verified",
-                    fileData: {
-                      // fileNumber: foundFile.uniqueId,
-                      // city: foundFile.city,
-                      // familyMembers: foundFile?.familyMembers?.length,
-                      // emiratesId: foundFile.emiratesId,
-                      // phoneNumber: foundFile.phoneNumber,
+                    data: {
                       fileId: foundFile._id,
                     },
                   });
+                  return;
                 }
               });
             }
           }
         );
       } else {
-        throw new Error("Otp is wrong");
+        // throw new Error("Otp is wrong");
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "Otp is wrong",
+        });
+        return;
       }
     } else {
       throw new Error("File Id is not correct");
     }
   } catch (err) {
     console.log(err.message);
-    return res.json({ success: false, message: err.message });
+    // return res.json({ success: false, message: err.message });
+    res.json({
+      serverError: 1,
+      success: 0,
+      message: err.message,
+    });
+    return;
   }
 };
 
@@ -678,20 +786,44 @@ const login = async (req, res, next) => {
       console.log(existingUser, "i am existing user");
 
       if (!existingUser) {
-        throw new Error("Account does not exist");
+        // throw new Error("Account does not exist");
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "Account does not exist",
+        });
+        return;
       } else {
         if (existingUser.clinicVerified === false) {
-          throw new Error("Your account has not verified from the clinic yet");
+          // throw new Error("Your account has not verified from the clinic yet");
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "Your account has not verified from the clinic yet",
+          });
+          return;
         }
 
         if (existingUser.active === false) {
-          throw new Error(
-            "Your account has not been activated from the clinic yet"
-          );
+          // throw new Error(
+          //   "Your account has not been activated from the clinic yet"
+          // );
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "Your account has not been activated from the clinic yet",
+          });
+          return;
         }
 
         if (existingUser.phoneVerified === false) {
-          throw new Error("You have not verified your phone number");
+          // throw new Error("You have not verified your phone number");
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "You have not verified your phone number",
+          });
+          return;
         }
 
         let isValidPassword = false;
@@ -706,7 +838,13 @@ const login = async (req, res, next) => {
         }
 
         if (!isValidPassword) {
-          throw new Error("Wrong Password");
+          // throw new Error("Wrong Password");
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "Wrong Password",
+          });
+          return;
         }
 
         let access_token;
@@ -734,51 +872,100 @@ const login = async (req, res, next) => {
         let familyMembers = await User.find({ emiratesId: { $in: familyIds } });
         console.log(familyMembers, "we are members");
 
-        let decryptedFileNumber;
-        decryptedFileNumber = CryptoJS.AES.decrypt(
-          existingUser.fileNumber,
-          "love"
-        );
-        decryptedFileNumber = decryptedFileNumber.toString(CryptoJS.enc.Utf8);
-        console.log(decryptedFileNumber, "decrupted");
+        // let decryptedFileNumber;
+        // decryptedFileNumber = CryptoJS.AES.decrypt(
+        //   existingUser.fileNumber,
+        //   "love"
+        // );
+        // decryptedFileNumber = decryptedFileNumber.toString(CryptoJS.enc.Utf8);
+        // console.log(decryptedFileNumber, "decrupted");
 
+        // res.json({
+        //   message: "you are login success fully ",
+        //   id: existingUser._id,
+        //   role: existingUser.role,
+        //   access_token: access_token,
+        //   success: true,
+        //   fileNumber: existingUser.fileNumber,
+        //   familyMembers,
+        // });
         res.json({
-          message: "you are login success fully ",
-          id: existingUser._id,
-          role: existingUser.role,
-          access_token: access_token,
-          success: true,
-          fileNumber: existingUser.fileNumber,
-          familyMembers,
+          serverError: 0,
+          success: 1,
+          message: "you are login success fully",
+          data: {
+            id: existingUser._id,
+            role: existingUser.role,
+            access_token: access_token,
+            fileNumber: existingUser.fileNumber,
+            familyMembers,
+          },
         });
+        return;
       }
     } catch (err) {
       console.log(err.message);
-      res.json({ success: false, message: err.message });
+      // res.json({ success: false, message: err.message });
+      res.json({
+        serverError: 1,
+        success: 0,
+        message: err.message,
+      });
+      return;
     }
   } else {
     try {
       existingUser = await File.findOne({ uniqueId: fileNumber });
 
       if (!existingUser) {
-        throw new Error("Account does not exist");
+        // throw new Error("Account does not exist");
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: err.message,
+        });
+        return;
       } else {
         if (existingUser.clinicVerified === false) {
-          throw new Error("Your account has not verified from the clinic yet");
+          // throw new Error("Your account has not verified from the clinic yet");
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "Your account has not verified from the clinic yet",
+          });
+          return;
         }
 
         if (existingUser.active === false) {
-          throw new Error(
-            "Your account has not been activated from the clinic yet"
-          );
+          // throw new Error(
+          //   "Your account has not been activated from the clinic yet"
+          // );
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "Your account has not been activated from the clinic yet",
+          });
+          return;
         }
 
         if (existingUser.phoneVerified === false) {
-          throw new Error("You have not verified your phone number");
+          // throw new Error("You have not verified your phone number");
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "You have not verified your phone number",
+          });
+          return;
         }
 
         if (existingUser.phoneVerified === false) {
-          throw new Error("Your have not verified your phone number");
+          // throw new Error("Your have not verified your phone number");
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "Your have not verified your phone number",
+          });
+          return;
         }
 
         let isValidPassword = false;
@@ -793,7 +980,13 @@ const login = async (req, res, next) => {
         }
 
         if (!isValidPassword) {
-          throw new Error("Wrong Password");
+          // throw new Error("Wrong Password");
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "Wrong Password",
+          });
+          return;
         }
 
         let access_token;
@@ -828,19 +1021,39 @@ const login = async (req, res, next) => {
         // );
         // decryptedFileNumber = decryptedFileNumber.toString(CryptoJS.enc.Utf8);
 
+        // res.json({
+        //   message: "you are login success fully ",
+        //   id: existingUser._id,
+        //   role: existingUser.role,
+        //   access_token: access_token,
+        //   success: true,
+        //   fileNumber: existingUser.fileNumber,
+        //   familyMembers,
+        // });
+
         res.json({
-          message: "you are login success fully ",
-          id: existingUser._id,
-          role: existingUser.role,
-          access_token: access_token,
-          success: true,
-          fileNumber: existingUser.fileNumber,
-          familyMembers,
+          serverError: 0,
+          success: 1,
+          message: "you are login success fully",
+          data: {
+            id: existingUser._id,
+            role: existingUser.role,
+            access_token: access_token,
+            fileNumber: existingUser.fileNumber,
+            familyMembers,
+          },
         });
+        return;
       }
     } catch (err) {
       console.log(err.message);
-      res.json({ success: false, message: err.message });
+      // res.json({ success: false, message: err.message });
+      res.json({
+        serverError: 1,
+        success: 0,
+        message: err.message,
+      });
+      return;
     }
   }
 };
@@ -858,10 +1071,16 @@ const newPassword = async (req, res) => {
     } catch (err) {
       console.log("Error hashing password", err);
 
+      // res.json({
+      //   success: false,
+      //   data: err,
+      //   message: "Something went wrong",
+      // });
+      // return;
       res.json({
-        success: false,
-        data: err,
-        message: "Something went wrong",
+        serverError: 1,
+        success: 0,
+        message: "Error hashing password",
       });
       return;
     }
@@ -886,21 +1105,39 @@ const newPassword = async (req, res) => {
                   { fileId: fileId },
                   async (err) => {
                     if (err) {
-                      throw new Error("Error deleting the OTP Session");
+                      // throw new Error("Error deleting the OTP Session");
+                      res.json({
+                        serverError: 1,
+                        success: 0,
+                        message: "Error deleting the OTP Session",
+                      });
+                      return;
                     } else {
                       console.log("deleted previous");
-                      return res.json({
-                        success: true,
+                      // return res.json({
+                      //   success: true,
+                      //   message: "Password Updated",
+                      // });
+                      res.json({
+                        serverError: 0,
+                        success: 1,
                         message: "Password Updated",
                       });
+                      return;
                     }
                   }
                 );
               } else {
                 // console.log(err);
+                // res.json({
+                //   success: false,
+                //   data: err,
+                //   message: "Something went wrong",
+                // });
+                // return;
                 res.json({
-                  success: false,
-                  data: err,
+                  serverError: 1,
+                  success: 0,
                   message: "Something went wrong",
                 });
                 return;
@@ -908,20 +1145,44 @@ const newPassword = async (req, res) => {
             }
           );
         } else {
-          res.json({ success: false, message: "Otp Wrong" });
+          // res.json({ success: false, message: "Otp Wrong" });
+          // return;
+          res.json({
+            serverError: 0,
+            success: 0,
+            message: "Otp Wrong",
+          });
           return;
         }
       } else {
-        return res.json({ success: false, message: "Somthing went wrong" });
+        // return res.json({ success: false, message: "Somthing went wrong" });
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "User not found",
+        });
+        return;
       }
     } catch (err) {
-      return res.json({ success: false, message: "Somthing went wrong" });
+      // return res.json({ success: false, message: "Somthing went wrong" });
+      res.json({
+        serverError: 1,
+        success: 0,
+        message: "Somthing went wrong",
+      });
+      return;
     }
   } else {
+    // res.json({
+    //   success: false,
+    //   message: "Some Details are missing",
+    // });
     res.json({
-      success: false,
+      serverError: 0,
+      success: 0,
       message: "Some Details are missing",
     });
+    return;
   }
 };
 
@@ -1011,8 +1272,14 @@ const requestForgotOtp = async (req, res) => {
   const { phoneNumber } = req.body;
   let phoneExist = await File.findOne({ phoneNumber: phoneNumber }, "_id");
   if (!phoneExist) {
+    // res.json({
+    //   success: false,
+    //   message: "Phonenumber is not registered with us",
+    // });
+    // return;
     res.json({
-      success: false,
+      serverError: 0,
+      success: 0,
       message: "Phonenumber is not registered with us",
     });
     return;
@@ -1051,17 +1318,32 @@ const requestForgotOtp = async (req, res) => {
   createdForgotOtp.save((err) => {
     if (err) {
       console.log(err),
+        // res.json({
+        //   success: false,
+        //   message: "Somthing went wrong",
+        // });
         res.json({
-          success: false,
+          serverError: 1,
+          success: 0,
           message: "Somthing went wrong",
         });
+      return;
     } else {
       sendPhoneOtp(phoneNumber, otp);
+      // res.json({
+      //   success: true,
+      //   message: "OTP Sent to Phone Number",
+      //   fileId: phoneExist._id,
+      // });
       res.json({
-        success: true,
+        serverError: 0,
+        success: 1,
         message: "OTP Sent to Phone Number",
-        fileId: phoneExist._id,
+        data: {
+          fileId: phoneExist._id,
+        },
       });
+      return;
     }
   });
 
@@ -1077,28 +1359,58 @@ const verifyForgotOtp = async (req, res) => {
   if (found) {
     if (found.expires > Date.now()) {
       if (found.otp === otp) {
+        // res.json({
+        //   success: true,
+        //   message: "OTP got verified",
+        // });
         res.json({
-          success: true,
+          serverError: 0,
+          success: 1,
           message: "OTP got verified",
         });
+        return;
       } else {
-        res.json({ success: false, message: "OTP is wrong" });
+        // res.json({ success: false, message: "OTP is wrong" });
+        res.json({
+          serverError: 0,
+          success: 0,
+          message: "OTP is wrong",
+        });
+        return;
       }
     } else {
+      // res.json({
+      //   success: false,
+      //   message: "OTP got expired. Request the new one",
+      // });
       res.json({
-        success: false,
+        serverError: 0,
+        success: 0,
         message: "OTP got expired. Request the new one",
       });
+      return;
     }
   } else {
-    res.json({ success: false, message: "Kindly request the OTP Again" });
+    // res.json({ success: false, message: "Kindly request the OTP Again" });
+    res.json({
+      serverError: 0,
+      success: 0,
+      message: "Kindly request the OTP Again",
+    });
+    return;
   }
 };
 
 const contact = async (req, res) => {
   console.log(req.files);
   if (req.files.length === 0) {
-    res.json({ success: false, message: "Files not selecteds" });
+    // res.json({ success: false, message: "Files not selecteds" });
+    // return;
+    res.json({
+      serverError: 0,
+      success: 0,
+      message: "Files not selected",
+    });
     return;
   }
   let filesName = req.files.map((file) => file.filename);
@@ -1127,16 +1439,28 @@ const contact = async (req, res) => {
   savedContact.save((err) => {
     if (err) {
       console.log(err);
+      // res.json({
+      //   success: false,
+      //   message: "Somthing went wrong while saving the contact info",
+      // });
       res.json({
-        success: false,
+        serverError: 1,
+        success: 0,
         message: "Somthing went wrong while saving the contact info",
       });
+      return;
     } else {
+      // res.json({
+      //   success: true,
+      //   message:
+      //     "We have received your message and will respond within 24-48 Hrs",
+      // });
       res.json({
-        success: true,
-        message:
-          "We have received your message and will respond within 24-48 Hrs",
+        serverError: 0,
+        success: 1,
+        message: "Somthing went wrong while saving the contact info",
       });
+      return;
     }
   });
 };
