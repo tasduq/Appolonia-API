@@ -58,7 +58,7 @@ const checkPatient = async (req, res) => {
     throw new Error("Error Genrating OTP");
   }
   try {
-    if (isFileNumber === '1') {
+    if (isFileNumber === "1") {
       fileExist = await File.findOne({
         uniqueId: fileNumber,
         clinicVerified: true,
@@ -67,23 +67,29 @@ const checkPatient = async (req, res) => {
         // throw new Error("No account is registered with that File Number");
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "No account is registered with that File Number",
+          data: {
+            success: 0,
+          },
         });
         return;
       } else {
         let foundForgotPhone = await Filephoneverified.findOne({
           fileId: fileExist._id,
         });
-      
+
         if (foundForgotPhone) {
-          Filephoneverified.deleteOne({ fileId: fileExist._id }, async (err) => {
-            if (err) {
-              throw new Error("Error deleting the OTP Session");
-            } else {
-              console.log("deleted previous");
+          Filephoneverified.deleteOne(
+            { fileId: fileExist._id },
+            async (err) => {
+              if (err) {
+                throw new Error("Error deleting the OTP Session");
+              } else {
+                console.log("deleted previous");
+              }
             }
-          });
+          );
         }
         sendPhoneOtp(fileExist.phoneNumber, otp);
         // sendEmailOtp(email, otp);'
@@ -108,11 +114,12 @@ const checkPatient = async (req, res) => {
             // });
             res.json({
               serverError: 0,
-              success: 1,
+
               message:
                 "We have sent the OTP to the number and email associated to that account",
               data: {
                 fileId: fileExist._id,
+                success: 1,
               },
             });
             return;
@@ -129,23 +136,29 @@ const checkPatient = async (req, res) => {
         // throw new Error("No account is registered with that Emirates Id");
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "No account is registered with that Emirates Id",
+          data: {
+            success: 0,
+          },
         });
         return;
       } else {
         let foundForgotPhone = await Filephoneverified.findOne({
           fileId: fileExist._id,
         });
-      
+
         if (foundForgotPhone) {
-          Filephoneverified.deleteOne({ fileId: fileExist._id }, async (err) => {
-            if (err) {
-              throw new Error("Error deleting the OTP Session");
-            } else {
-              console.log("deleted previous");
+          Filephoneverified.deleteOne(
+            { fileId: fileExist._id },
+            async (err) => {
+              if (err) {
+                throw new Error("Error deleting the OTP Session");
+              } else {
+                console.log("deleted previous");
+              }
             }
-          });
+          );
         }
         sendPhoneOtp(fileExist.phoneNumber, otp);
         // sendEmailOtp(email, otp);
@@ -170,11 +183,12 @@ const checkPatient = async (req, res) => {
             // });
             res.json({
               serverError: 0,
-              success: 1,
+
               message:
                 "We have sent the OTP to the number and email associated to that account",
               data: {
                 fileId: fileExist._id,
+                success: 1,
               },
             });
             return;
@@ -192,8 +206,11 @@ const checkPatient = async (req, res) => {
     // return;
     res.json({
       serverError: 1,
-      success: 0,
+
       message: err.message,
+      data: {
+        success: 0,
+      },
     });
     return;
   }
@@ -218,7 +235,7 @@ const signup = async (req, res, next) => {
   } = req.body;
   console.log(req.body);
 
-  if (isExisting === '0') {
+  if (isExisting === "0") {
     try {
       let existingUser = await User.findOne({ uniqueId: emiratesId });
 
@@ -226,8 +243,11 @@ const signup = async (req, res, next) => {
         // throw new Error("User Already Exist");
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "User Already Exist",
+          data: {
+            success: 0,
+          },
         });
         return;
       }
@@ -237,8 +257,11 @@ const signup = async (req, res, next) => {
         // throw new Error("User Phone Already Exist");
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "User Phone Already Exist",
+          data: {
+            success: 0,
+          },
         });
         return;
       }
@@ -248,8 +271,11 @@ const signup = async (req, res, next) => {
         // throw new Error("Emirates Id Already Exist");
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "Emirates Id Already Exist",
+          data: {
+            success: 0,
+          },
         });
         return;
       }
@@ -315,8 +341,6 @@ const signup = async (req, res, next) => {
               console.log(err);
               throw new Error("Error creating the User");
             } else {
-              
-              
               let latestFile = await File.findOne(
                 { phoneNumber: phoneNumber },
                 "_id"
@@ -326,15 +350,18 @@ const signup = async (req, res, next) => {
               let foundForgotPhone = await Filephoneverified.findOne({
                 fileId: latestFile._id,
               });
-            
+
               if (foundForgotPhone) {
-                Filephoneverified.deleteOne({ fileId: latestFile._id }, async (err) => {
-                  if (err) {
-                    throw new Error("Error deleting the OTP Session");
-                  } else {
-                    console.log("deleted previous");
+                Filephoneverified.deleteOne(
+                  { fileId: latestFile._id },
+                  async (err) => {
+                    if (err) {
+                      throw new Error("Error deleting the OTP Session");
+                    } else {
+                      console.log("deleted previous");
+                    }
                   }
-                });
+                );
               }
 
               sendPhoneOtp(phoneNumber, otp);
@@ -373,11 +400,12 @@ const signup = async (req, res, next) => {
                         // });
                         res.json({
                           serverError: 0,
-                          success: 1,
+
                           message:
                             "Registration Successful. You would be notified from the clinic soon",
                           data: {
                             fileId: latestFile._id,
+                            success: 1,
                           },
                         });
                         return;
@@ -393,9 +421,16 @@ const signup = async (req, res, next) => {
       // } catch (err) {
     } catch (err) {
       console.log(err, "i am error");
+      // res.json({
+      //   success: false,
+      //   message: err.message,
+      // });
       res.json({
-        success: false,
+        errorCode: 1,
         message: err.message,
+        data: {
+          success: 0,
+        },
       });
     }
   } else {
@@ -408,8 +443,11 @@ const signup = async (req, res, next) => {
         // throw new Error("No account is registered with that File Number");
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "No account is registered with that File Number",
+          data: {
+            success: 0,
+          },
         });
         return;
       } else {
@@ -429,9 +467,12 @@ const signup = async (req, res, next) => {
               // });
               res.json({
                 serverError: 0,
-                success: 1,
+
                 message:
                   "Thanks for registering with us, our team will review your details and contact you soon to activate your account",
+                data: {
+                  success: 1,
+                },
               });
               return;
             }
@@ -612,8 +653,11 @@ const signup = async (req, res, next) => {
       // });
       res.json({
         serverError: 1,
-        success: 0,
+
         message: err.message,
+        data: {
+          success: 0,
+        },
       });
       return;
     }
@@ -691,7 +735,7 @@ const sendEmailOtp = (email, otp) => {
 };
 
 const emailVerify = async (req, res) => {
-  console.log(req.body)
+  console.log(req.body);
   const { otp, phoneNumber, fileId } = req.body;
   let user;
 
@@ -734,10 +778,11 @@ const emailVerify = async (req, res) => {
                   // });
                   res.json({
                     serverError: 0,
-                    success: 1,
+
                     message: "Phone Number verified",
                     data: {
                       fileId: foundFile._id,
+                      success: 1,
                     },
                   });
                   return;
@@ -750,8 +795,11 @@ const emailVerify = async (req, res) => {
         // throw new Error("Otp is wrong");
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "Otp is wrong",
+          data: {
+            success: 0,
+          },
         });
         return;
       }
@@ -763,8 +811,11 @@ const emailVerify = async (req, res) => {
     // return res.json({ success: false, message: err.message });
     res.json({
       serverError: 1,
-      success: 0,
+
       message: err.message,
+      data: {
+        success: 0,
+      },
     });
     return;
   }
@@ -824,7 +875,7 @@ const login = async (req, res, next) => {
 
   // console.log(email, password);
 
-  if (isFileNumber === '0') {
+  if (isFileNumber === "0") {
     try {
       existingUser = await File.findOne({ emiratesId: emiratesId });
       console.log(existingUser, "i am existing user");
@@ -833,8 +884,11 @@ const login = async (req, res, next) => {
         // throw new Error("Account does not exist");
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "Account does not exist",
+          data: {
+            success: 0,
+          },
         });
         return;
       } else {
@@ -842,8 +896,11 @@ const login = async (req, res, next) => {
           // throw new Error("Your account has not verified from the clinic yet");
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "Your account has not verified from the clinic yet",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -854,8 +911,11 @@ const login = async (req, res, next) => {
           // );
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "Your account has not been activated from the clinic yet",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -864,8 +924,11 @@ const login = async (req, res, next) => {
           // throw new Error("You have not verified your phone number");
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "You have not verified your phone number",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -885,8 +948,11 @@ const login = async (req, res, next) => {
           // throw new Error("Wrong Password");
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "Wrong Password",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -935,7 +1001,7 @@ const login = async (req, res, next) => {
         // });
         res.json({
           serverError: 0,
-          success: 1,
+
           message: "you are login success fully",
           data: {
             id: existingUser._id,
@@ -943,6 +1009,7 @@ const login = async (req, res, next) => {
             access_token: access_token,
             fileNumber: existingUser.fileNumber,
             familyMembers,
+            success: 1,
           },
         });
         return;
@@ -952,8 +1019,11 @@ const login = async (req, res, next) => {
       // res.json({ success: false, message: err.message });
       res.json({
         serverError: 1,
-        success: 0,
+
         message: err.message,
+        data: {
+          success: 0,
+        },
       });
       return;
     }
@@ -965,8 +1035,11 @@ const login = async (req, res, next) => {
         // throw new Error("Account does not exist");
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "User not Found",
+          data: {
+            success: 0,
+          },
         });
         return;
       } else {
@@ -974,8 +1047,11 @@ const login = async (req, res, next) => {
           // throw new Error("Your account has not verified from the clinic yet");
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "Your account has not verified from the clinic yet",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -986,8 +1062,11 @@ const login = async (req, res, next) => {
           // );
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "Your account has not been activated from the clinic yet",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -996,8 +1075,11 @@ const login = async (req, res, next) => {
           // throw new Error("You have not verified your phone number");
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "You have not verified your phone number",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -1006,8 +1088,11 @@ const login = async (req, res, next) => {
           // throw new Error("Your have not verified your phone number");
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "Your have not verified your phone number",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -1027,8 +1112,11 @@ const login = async (req, res, next) => {
           // throw new Error("Wrong Password");
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "Wrong Password",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -1077,7 +1165,7 @@ const login = async (req, res, next) => {
 
         res.json({
           serverError: 0,
-          success: 1,
+
           message: "you are login success fully",
           data: {
             id: existingUser._id,
@@ -1085,6 +1173,7 @@ const login = async (req, res, next) => {
             access_token: access_token,
             fileNumber: existingUser.fileNumber,
             familyMembers,
+            success: 1,
           },
         });
         return;
@@ -1094,8 +1183,11 @@ const login = async (req, res, next) => {
       // res.json({ success: false, message: err.message });
       res.json({
         serverError: 1,
-        success: 0,
+
         message: err.message,
+        data: {
+          success: 0,
+        },
       });
       return;
     }
@@ -1123,8 +1215,11 @@ const newPassword = async (req, res) => {
       // return;
       res.json({
         serverError: 1,
-        success: 0,
+
         message: "Error hashing password",
+        data: {
+          success: 0,
+        },
       });
       return;
     }
@@ -1152,8 +1247,11 @@ const newPassword = async (req, res) => {
                       // throw new Error("Error deleting the OTP Session");
                       res.json({
                         serverError: 1,
-                        success: 0,
+
                         message: "Error deleting the OTP Session",
+                        data: {
+                          success: 0,
+                        },
                       });
                       return;
                     } else {
@@ -1164,8 +1262,11 @@ const newPassword = async (req, res) => {
                       // });
                       res.json({
                         serverError: 0,
-                        success: 1,
+
                         message: "Password Updated",
+                        data: {
+                          success: 1,
+                        },
                       });
                       return;
                     }
@@ -1181,8 +1282,11 @@ const newPassword = async (req, res) => {
                 // return;
                 res.json({
                   serverError: 1,
-                  success: 0,
+
                   message: "Something went wrong",
+                  data: {
+                    success: 0,
+                  },
                 });
                 return;
               }
@@ -1193,8 +1297,11 @@ const newPassword = async (req, res) => {
           // return;
           res.json({
             serverError: 0,
-            success: 0,
+
             message: "Otp Wrong",
+            data: {
+              success: 0,
+            },
           });
           return;
         }
@@ -1202,8 +1309,11 @@ const newPassword = async (req, res) => {
         // return res.json({ success: false, message: "Somthing went wrong" });
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "User not found",
+          data: {
+            success: 0,
+          },
         });
         return;
       }
@@ -1211,8 +1321,11 @@ const newPassword = async (req, res) => {
       // return res.json({ success: false, message: "Somthing went wrong" });
       res.json({
         serverError: 1,
-        success: 0,
+
         message: "Somthing went wrong",
+        data: {
+          success: 0,
+        },
       });
       return;
     }
@@ -1223,8 +1336,11 @@ const newPassword = async (req, res) => {
     // });
     res.json({
       serverError: 0,
-      success: 0,
+
       message: "Some Details are missing",
+      data: {
+        success: 0,
+      },
     });
     return;
   }
@@ -1271,7 +1387,15 @@ const changePassword = async (req, res) => {
         { $set: { password: hashedPassword } },
         function (err) {
           if (!err) {
-            return res.json({ success: true, message: "Password Updated" });
+            // return res.json({ success: true, message: "Password Updated" });
+            res.json({
+              errorCode: 0,
+              message: "Password Updated",
+              data: {
+                success: 1,
+              },
+            });
+            return;
           }
         }
       );
@@ -1280,8 +1404,11 @@ const changePassword = async (req, res) => {
     }
   } catch (err) {
     res.json({
-      errorCode: 0,
+      errorCode: 1,
       message: err.message,
+      data: {
+        success: 0,
+      },
     });
   }
 };
@@ -1292,8 +1419,11 @@ const requestNewOtp = async (req, res) => {
   let phoneExist = await File.findOne({ phoneNumber: phoneNumber }, "_id");
   if (!phoneExist) {
     res.json({
-      success: false,
+      errorCode: 0,
       message: "Phonenumber is not registered with us",
+      data: {
+        success: 0,
+      },
     });
     return;
   }
@@ -1307,7 +1437,11 @@ const requestNewOtp = async (req, res) => {
   });
   sendPhoneOtp(phoneNumber, otp);
 
-  res.json({ success: true, message: "OTP Sent to Phone Number" });
+  res.json({
+    errorCode: 0,
+    message: "OTP Sent to Phone Number",
+    data: { success: 1 },
+  });
   return;
 };
 
@@ -1323,8 +1457,11 @@ const requestForgotOtp = async (req, res) => {
     // return;
     res.json({
       serverError: 0,
-      success: 0,
+
       message: "Phonenumber is not registered with us",
+      data: {
+        success: 0,
+      },
     });
     return;
   }
@@ -1368,8 +1505,11 @@ const requestForgotOtp = async (req, res) => {
         // });
         res.json({
           serverError: 1,
-          success: 0,
+
           message: "Somthing went wrong",
+          data: {
+            success: 0,
+          },
         });
       return;
     } else {
@@ -1381,10 +1521,11 @@ const requestForgotOtp = async (req, res) => {
       // });
       res.json({
         serverError: 0,
-        success: 1,
+
         message: "OTP Sent to Phone Number",
         data: {
           fileId: phoneExist._id,
+          success: 1,
         },
       });
       return;
@@ -1409,16 +1550,22 @@ const verifyForgotOtp = async (req, res) => {
         // });
         res.json({
           serverError: 0,
-          success: 1,
+
           message: "OTP got verified",
+          data: {
+            success: 1,
+          },
         });
         return;
       } else {
         // res.json({ success: false, message: "OTP is wrong" });
         res.json({
           serverError: 0,
-          success: 0,
+
           message: "OTP is wrong",
+          data: {
+            success: 0,
+          },
         });
         return;
       }
@@ -1429,8 +1576,11 @@ const verifyForgotOtp = async (req, res) => {
       // });
       res.json({
         serverError: 0,
-        success: 0,
+
         message: "OTP got expired. Request the new one",
+        data: {
+          success: 0,
+        },
       });
       return;
     }
@@ -1438,8 +1588,11 @@ const verifyForgotOtp = async (req, res) => {
     // res.json({ success: false, message: "Kindly request the OTP Again" });
     res.json({
       serverError: 0,
-      success: 0,
+
       message: "Kindly request the OTP Again",
+      data: {
+        success: 0,
+      },
     });
     return;
   }
@@ -1452,8 +1605,11 @@ const contact = async (req, res) => {
     // return;
     res.json({
       serverError: 0,
-      success: 0,
+
       message: "Files not selected",
+      data: {
+        success: 0,
+      },
     });
     return;
   }
@@ -1489,8 +1645,11 @@ const contact = async (req, res) => {
       // });
       res.json({
         serverError: 1,
-        success: 0,
+
         message: "Somthing went wrong while saving the contact info",
+        data: {
+          success: 0,
+        },
       });
       return;
     } else {
@@ -1501,8 +1660,11 @@ const contact = async (req, res) => {
       // });
       res.json({
         serverError: 0,
-        success: 1,
+
         message: "Somthing went wrong while saving the contact info",
+        data: {
+          success: 1,
+        },
       });
       return;
     }
