@@ -691,6 +691,7 @@ const sendEmailOtp = (email, otp) => {
 };
 
 const emailVerify = async (req, res) => {
+  console.log(req.body)
   const { otp, phoneNumber, fileId } = req.body;
   let user;
 
