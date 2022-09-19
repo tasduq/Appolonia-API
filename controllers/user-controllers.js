@@ -58,7 +58,7 @@ const checkPatient = async (req, res) => {
     throw new Error("Error Genrating OTP");
   }
   try {
-    if (isFileNumber === 1) {
+    if (isFileNumber === '1') {
       fileExist = await File.findOne({
         uniqueId: fileNumber,
         clinicVerified: true,
@@ -72,6 +72,19 @@ const checkPatient = async (req, res) => {
         });
         return;
       } else {
+        let foundForgotPhone = await Filephoneverified.findOne({
+          fileId: fileExist._id,
+        });
+      
+        if (foundForgotPhone) {
+          Filephoneverified.deleteOne({ fileId: fileExist._id }, async (err) => {
+            if (err) {
+              throw new Error("Error deleting the OTP Session");
+            } else {
+              console.log("deleted previous");
+            }
+          });
+        }
         sendPhoneOtp(fileExist.phoneNumber, otp);
         // sendEmailOtp(email, otp);'
 
@@ -121,6 +134,19 @@ const checkPatient = async (req, res) => {
         });
         return;
       } else {
+        let foundForgotPhone = await Filephoneverified.findOne({
+          fileId: fileExist._id,
+        });
+      
+        if (foundForgotPhone) {
+          Filephoneverified.deleteOne({ fileId: fileExist._id }, async (err) => {
+            if (err) {
+              throw new Error("Error deleting the OTP Session");
+            } else {
+              console.log("deleted previous");
+            }
+          });
+        }
         sendPhoneOtp(fileExist.phoneNumber, otp);
         // sendEmailOtp(email, otp);
 
@@ -289,13 +315,30 @@ const signup = async (req, res, next) => {
               console.log(err);
               throw new Error("Error creating the User");
             } else {
-              sendPhoneOtp(phoneNumber, otp);
-              sendEmailOtp(email, otp);
+              
+              
               let latestFile = await File.findOne(
                 { phoneNumber: phoneNumber },
                 "_id"
               );
               console.log(latestFile);
+
+              let foundForgotPhone = await Filephoneverified.findOne({
+                fileId: latestFile._id,
+              });
+            
+              if (foundForgotPhone) {
+                Filephoneverified.deleteOne({ fileId: latestFile._id }, async (err) => {
+                  if (err) {
+                    throw new Error("Error deleting the OTP Session");
+                  } else {
+                    console.log("deleted previous");
+                  }
+                });
+              }
+
+              sendPhoneOtp(phoneNumber, otp);
+              sendEmailOtp(email, otp);
 
               const createdFilephoneverification = new Filephoneverified({
                 otp: otp,
@@ -775,12 +818,12 @@ const fileVerify = async (req, res) => {
 };
 
 const login = async (req, res, next) => {
-  const { fileNumber, password, emiratesId, type } = req.body;
+  const { fileNumber, password, emiratesId, isFileNumber } = req.body;
   let existingUser;
 
   // console.log(email, password);
 
-  if (type === 1) {
+  if (isFileNumber === '0') {
     try {
       existingUser = await File.findOne({ emiratesId: emiratesId });
       console.log(existingUser, "i am existing user");
