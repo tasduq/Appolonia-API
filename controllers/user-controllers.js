@@ -182,7 +182,7 @@ const signup = async (req, res, next) => {
     countryCode,
     emiratesId,
     role,
-    type,
+    isExisting,
     fileNumber,
     password,
     city,
@@ -192,7 +192,7 @@ const signup = async (req, res, next) => {
   } = req.body;
   console.log(req.body);
 
-  if (type === 1) {
+  if (isExisting === 0) {
     try {
       let existingUser = await User.findOne({ uniqueId: emiratesId });
 
