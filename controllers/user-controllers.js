@@ -192,7 +192,7 @@ const signup = async (req, res, next) => {
   } = req.body;
   console.log(req.body);
 
-  if (isExisting === 0) {
+  if (isExisting === false) {
     try {
       let existingUser = await User.findOne({ uniqueId: emiratesId });
 
