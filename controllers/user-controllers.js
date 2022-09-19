@@ -966,7 +966,7 @@ const login = async (req, res, next) => {
         res.json({
           serverError: 0,
           success: 0,
-          message: err.message,
+          message: "User not Found",
         });
         return;
       } else {
