@@ -1666,7 +1666,8 @@ const contact = async (req, res) => {
       res.json({
         serverError: 0,
 
-        message: "Somthing went wrong while saving the contact info",
+        message:
+          "We have received your message and will respond within 24-48 Hrs",
         data: {
           success: 1,
         },
