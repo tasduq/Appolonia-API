@@ -1600,20 +1600,25 @@ const verifyForgotOtp = async (req, res) => {
 
 const contact = async (req, res) => {
   console.log(req.files);
-  if (req.files.length === 0) {
-    // res.json({ success: false, message: "Files not selecteds" });
-    // return;
-    res.json({
-      serverError: 0,
+  // if (req.files.length === 0) {
+  //   // res.json({ success: false, message: "Files not selecteds" });
+  //   // return;
+  //   res.json({
+  //     serverError: 0,
 
-      message: "Files not selected",
-      data: {
-        success: 0,
-      },
-    });
-    return;
+  //     message: "Files not selected",
+  //     data: {
+  //       success: 0,
+  //     },
+  //   });
+  //   return;
+  // }
+  let filesName = [];
+  if (req.files.length > 0) {
+    console.log(req.files, "here are the files");
+    filesName = req.files.map((file) => file.filename);
   }
-  let filesName = req.files.map((file) => file.filename);
+
   console.log(req.body.name);
   const {
     name,
