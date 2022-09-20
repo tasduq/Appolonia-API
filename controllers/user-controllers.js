@@ -1614,7 +1614,7 @@ const contact = async (req, res) => {
   //   return;
   // }
   let filesName = [];
-  if (req.files.length > 0) {
+  if (req?.files?.length > 0) {
     console.log(req.files, "here are the files");
     filesName = req.files.map((file) => file.filename);
   }
