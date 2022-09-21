@@ -4,16 +4,17 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  email: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
+  firstName: { type: String },
+  lastName: { type: String },
+  email: { type: String },
+  phoneNumber: { type: String },
   countryCode: { type: String },
-  emiratesId: { type: String, required: true },
+  emiratesId: { type: String },
   // role: {
   //   type: Schema.Types.ObjectId,
   //   ref: "Role",
   // },
+  fileNumber: { type: String },
   gender: { type: String },
   city: { type: String },
   dob: { type: String },
@@ -25,7 +26,8 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  uniqueId: { type: String },
+  uniqueId1: { type: String }, //fil
+  uniqueId2: { type: String }, //emi
 });
 
 // userSchema.plugin(uniqueValidator);

@@ -13,10 +13,11 @@ router.post("/checkpatient", usersController.checkPatient);
 router.post("/phoneverify", usersController.emailVerify);
 router.post("/fileverify", usersController.fileVerify);
 // router.post("/newotp", usersController.requestNewEmailOtp);
+router.post("/newotp", usersController.requestNewOtp);
 
 router.post("/login", usersController.login);
 router.post("/forgotpassword", usersController.requestForgotOtp);
-router.post("/newotp", usersController.requestNewOtp);
+
 router.post("/verifyforgototp", usersController.verifyForgotOtp);
 router.post("/newpasswordforgot", usersController.newPassword);
 

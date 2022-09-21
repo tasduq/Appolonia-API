@@ -6,8 +6,6 @@ const Schema = mongoose.Schema;
 const fileSchema = new Schema({
   phoneNumber: { type: String },
   countryCode: { type: String },
-  emiratesId: { type: String },
-  fileNumber: { type: String },
   password: { type: String },
   familyMembers: { type: Array },
   clinicVerified: { type: Boolean, default: false },
@@ -20,7 +18,8 @@ const fileSchema = new Schema({
     type: Date,
     default: Date.now,
   },
-  uniqueId: { type: String },
+  emiratesId: { type: String },
+  uniqueId: { type: String }, //emiid
 });
 
 // userSchema.plugin(uniqueValidator);

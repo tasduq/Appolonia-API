@@ -47,9 +47,6 @@ const checkPatient = async (req, res) => {
   const { isFileNumber, fileNumber, emiratesId } = req.body;
 
   let otp = otpGenerator.generate(4, {
-    // upperCase: false,
-    // specialChars: false,
-    // alphabets: false,
     lowerCaseAlphabets: false,
     upperCaseAlphabets: false,
     specialChars: false,
@@ -59,8 +56,20 @@ const checkPatient = async (req, res) => {
   }
   try {
     if (isFileNumber === "1") {
-      fileExist = await File.findOne({
-        uniqueId: fileNumber,
+      let user = await User.findOne({ uniqueId1: fileNumber });
+      if (!user) {
+        res.json({
+          serverError: 0,
+          message: "You are not a registered Patient",
+          data: {
+            success: 0,
+          },
+        });
+        return;
+      }
+
+      let fileExist = await File.findOne({
+        phoneNumber: user.phoneNumber,
         clinicVerified: true,
       });
       if (!fileExist) {
@@ -75,6 +84,17 @@ const checkPatient = async (req, res) => {
         });
         return;
       } else {
+        if (fileExist.active === true) {
+          res.json({
+            serverError: 0,
+
+            message: "This account is already active. Try logging in",
+            data: {
+              success: 0,
+            },
+          });
+          return;
+        }
         let foundForgotPhone = await Filephoneverified.findOne({
           fileId: fileExist._id,
         });
@@ -103,20 +123,11 @@ const checkPatient = async (req, res) => {
           if (err) {
             throw new Error("Error saving the OTP");
           } else {
-            // res.json({
-            //   errorCode: 1,
-            //   Data: {
-            //     success: true,
-            //     fileId: fileExist._id,
-            //     message:
-            //       "We have sent the OTP to the number and email associated to that account",
-            //   },
-            // });
             res.json({
               serverError: 0,
 
               message:
-                "We have sent the OTP to the number and email associated to that account",
+                "We have sent the OTP to the number associated to that account",
               data: {
                 fileId: fileExist._id,
                 success: 1,
@@ -127,8 +138,19 @@ const checkPatient = async (req, res) => {
         });
       }
     } else {
-      fileExist = await File.findOne({
-        emiratesId: emiratesId,
+      let user = await User.findOne({ uniqueId1: fileNumber });
+      if (!user) {
+        res.json({
+          serverError: 0,
+          message: "You are not a registered Patient",
+          data: {
+            success: 0,
+          },
+        });
+        return;
+      }
+      let fileExist = await File.findOne({
+        phoneNumber: user.phoneNumber,
         clinicVerified: true,
       });
       console.log(fileExist, "fileexist");
@@ -136,7 +158,6 @@ const checkPatient = async (req, res) => {
         // throw new Error("No account is registered with that Emirates Id");
         res.json({
           serverError: 0,
-
           message: "No account is registered with that Emirates Id",
           data: {
             success: 0,
@@ -144,6 +165,17 @@ const checkPatient = async (req, res) => {
         });
         return;
       } else {
+        if (fileExist.active === true) {
+          res.json({
+            serverError: 0,
+
+            message: "This account is already active. Try logging in",
+            data: {
+              success: 0,
+            },
+          });
+          return;
+        }
         let foundForgotPhone = await Filephoneverified.findOne({
           fileId: fileExist._id,
         });
@@ -172,20 +204,10 @@ const checkPatient = async (req, res) => {
           if (err) {
             throw new Error("Error saving the OTP");
           } else {
-            // res.json({
-            //   errorCode: 1,
-            //   Data: {
-            //     success: true,
-            //     fileId: fileExist._id,
-            //     message:
-            //       "We have sent the OTP to the number and email associated to that account",
-            //   },
-            // });
             res.json({
               serverError: 0,
-
               message:
-                "We have sent the OTP to the number and email associated to that account",
+                "We have sent the OTP to the number associated to that account",
               data: {
                 fileId: fileExist._id,
                 success: 1,
@@ -197,16 +219,8 @@ const checkPatient = async (req, res) => {
       }
     }
   } catch (err) {
-    // res.json({ success: false, message: err.message });
-    // res.json({
-    //   errorCode: 1,
-    //   success: 0,
-    //   Data: { success: false, message: err.message },
-    // });
-    // return;
     res.json({
       serverError: 1,
-
       message: err.message,
       data: {
         success: 0,
@@ -232,12 +246,28 @@ const signup = async (req, res, next) => {
     gender,
     isSignupWithFileNumber,
     fileId,
+    dob,
   } = req.body;
   console.log(req.body);
 
   if (isExisting === "0") {
     try {
-      let existingUser = await User.findOne({ uniqueId: emiratesId });
+      let existingUser;
+      existingUser = await User.findOne({ uniqueId1: emiratesId });
+
+      if (existingUser) {
+        // throw new Error("User Already Exist");
+        res.json({
+          serverError: 0,
+          message: "User Already Exist",
+          data: {
+            success: 0,
+          },
+        });
+        return;
+      }
+
+      existingUser = await User.findOne({ uniqueId: emiratesId });
 
       if (existingUser) {
         // throw new Error("User Already Exist");
@@ -258,7 +288,7 @@ const signup = async (req, res, next) => {
         res.json({
           serverError: 0,
 
-          message: "User Phone Already Exist",
+          message: "This phone is already registered to a family account. ",
           data: {
             success: 0,
           },
@@ -266,12 +296,11 @@ const signup = async (req, res, next) => {
         return;
       }
 
-      userPhoneExist = await File.findOne({ emiratesId: emiratesId });
+      userPhoneExist = await File.findOne({ uniqueId: emiratesId });
       if (userPhoneExist) {
         // throw new Error("Emirates Id Already Exist");
         res.json({
           serverError: 0,
-
           message: "Emirates Id Already Exist",
           data: {
             success: 0,
@@ -313,14 +342,16 @@ const signup = async (req, res, next) => {
         emiratesId: hashedemiratesId,
         role,
         countryCode,
-        uniqueId: emiratesId,
         city,
         gender,
+        dob,
+        fileNumber: "",
+        uniqueId1: "",
+        uniqueId2: emiratesId,
       });
 
       const createdFile = new File({
         phoneNumber: phoneNumber,
-        emiratesId: emiratesId,
         password: hashedpassword,
         clinicVerified: false,
         phoneVerified: false,
@@ -328,6 +359,8 @@ const signup = async (req, res, next) => {
         active: false,
         countryCode: countryCode,
         city,
+        emiratesId: hashedemiratesId,
+        uniqueId: emiratesId,
       });
 
       createdUser.save((err) => {
@@ -390,17 +423,8 @@ const signup = async (req, res, next) => {
                       if (err) {
                         throw new Error("Error creating the User");
                       } else {
-                        // res.json({
-                        //   message:
-                        //     "Registration Successful. You would be notified from the clinic soon",
-                        //   success: true,
-                        //   responseData: {
-                        //     fileId: latestFile._id,
-                        //   },
-                        // });
                         res.json({
                           serverError: 0,
-
                           message:
                             "Registration Successful. You would be notified from the clinic soon",
                           data: {
@@ -421,10 +445,7 @@ const signup = async (req, res, next) => {
       // } catch (err) {
     } catch (err) {
       console.log(err, "i am error");
-      // res.json({
-      //   success: false,
-      //   message: err.message,
-      // });
+
       res.json({
         errorCode: 1,
         message: err.message,
@@ -440,17 +461,27 @@ const signup = async (req, res, next) => {
 
       fileExist = await File.findOne({ _id: fileId });
       if (!fileExist) {
-        // throw new Error("No account is registered with that File Number");
         res.json({
           serverError: 0,
 
-          message: "No account is registered with that File Number",
+          message: "No account is registered with that File id",
           data: {
             success: 0,
           },
         });
         return;
       } else {
+        if (fileExist.active === true) {
+          res.json({
+            serverError: 0,
+
+            message: "This account is already active. Try logging in",
+            data: {
+              success: 0,
+            },
+          });
+          return;
+        }
         File.updateOne(
           {
             _id: fileId,
@@ -460,14 +491,8 @@ const signup = async (req, res, next) => {
             if (err) {
               throw new Error("Somthing went wrong while making request");
             } else {
-              // res.json({
-              //   success: true,
-              //   message:
-              //     "Thanks for registering with us, our team will review your details and contact you soon to activate your account",
-              // });
               res.json({
                 serverError: 0,
-
                 message:
                   "Thanks for registering with us, our team will review your details and contact you soon to activate your account",
                 data: {
@@ -479,178 +504,9 @@ const signup = async (req, res, next) => {
           }
         );
       }
-      // } else {
-      //   fileExist = await File.findOne({ emiratesId: emiratesId });
-      //   if (!fileExist) {
-      //     throw new Error("No account is registered with that Emirates Id");
-      //   } else {
-      //     File.updateOne(
-      //       {
-      //         emiratesId: emiratesId,
-      //       },
-      //       { $set: { activeRequested: true, password: hashedpassword } },
-      //       (err) => {
-      //         if (err) {
-      //           throw new Error("Somthing went wrong while making request");
-      //         } else {
-      //           res.json({
-      //             success: true,
-      //             message:
-      //               "Thanks for registering with us, our team will review your details and contact you soon to activate your account",
-      //           });
-      //         }
-      //       }
-      //     );
-      //   }
-      // }
-
-      // if (!fileNumber) {
-      //   throw new Error("You havn't provided the File Number");
-      // }
-
-      // let hashedfileNumber = CryptoJS.AES.encrypt(
-      //   fileNumber,
-      //   "love"
-      // ).toString();
-
-      // if (!existingFile) {
-      //   throw new Error(
-      //     "File Number is not correct or its not got verified by Clinic"
-      //   );
-      // }
-
-      // console.log(existingFile, "i am existing file");
-
-      // let existingFile = await File.updateOne({
-      //   uniqueId: fileNumber,
-      //   clinicVerified: true,
-      // });
-
-      // let hashedemiratesId = CryptoJS.AES.encrypt(
-      //   emiratesId,
-      //   "love"
-      // ).toString();
-
-      // let existingUser = await User.findOne({ uniqueId: emiratesId });
-
-      // if (existingUser) {
-      //   let { familyMembers } = existingFile;
-      //   let decryptedFamilyMembers = familyMembers.map((member) => {
-      //     let yoo = member;
-      //     console.log(yoo, "i am yoo");
-      //     let decryptedemiratesId;
-      //     decryptedemiratesId = CryptoJS.AES.decrypt(
-      //       yoo.memberEmiratesId,
-      //       "love"
-      //     );
-      //     decryptedemiratesId = decryptedemiratesId.toString(CryptoJS.enc.Utf8);
-      //     console.log(decryptedemiratesId, "i am decrypted");
-      //     yoo = {
-      //       ...yoo,
-      //       memberEmiratesId: decryptedemiratesId,
-      //     };
-      //     console.log(yoo, "i am yoo");
-      //     return yoo;
-      //   });
-
-      //   console.log(decryptedFamilyMembers, "i am family");
-
-      //   let foundMember = decryptedFamilyMembers.find(
-      //     (member) => member.memberEmiratesId === emiratesId
-      //   );
-
-      //   if (foundMember) {
-      //     if (foundMember.connected === true) {
-      //       throw new Error("You are already the member of the Family Account");
-      //     } else if (foundMember.connected === false) {
-      //       throw new Error("You have already requested to join the account.");
-      //     } else {
-      //       throw new Error("Somthing went wrong");
-      //     }
-      //   }
-
-      //   File.updateOne(
-      //     { uniqueId: fileNumber },
-      //     {
-      //       $push: {
-      //         familyMembers: {
-      //           memberEmiratesId: hashedemiratesId,
-      //           connected: false,
-      //         },
-      //       },
-      //     },
-      //     (err) => {
-      //       if (err) {
-      //         throw new Error("Error creating the User");
-      //       } else {
-      //         res.json({
-      //           success: true,
-      //           message: "You would be soon verified by the Clinic",
-      //         });
-      //       }
-      //     }
-      //   );
-      // } else {
-      //   let hashedEmail;
-      //   let hashedphoneNumber;
-
-      //   //   let existingUser = await User.findOne({ uniqueId: emiratesId });
-
-      //   // if (existingUser) {
-      //   //   throw new Error("User Already Exist");
-      //   // }
-
-      //   const createdUser = new User({
-      //     firstName,
-      //     lastName,
-      //     email: email,
-      //     phoneNumber: phoneNumber,
-      //     emiratesId: hashedemiratesId,
-      //     role,
-      //     countryCode,
-      //     uniqueId: emiratesId,
-      //     city,
-      //     gender,
-      //   });
-
-      //   createdUser.save(async (err) => {
-      //     if (err) {
-      //       throw new Error("Error creating the User");
-      //     } else {
-      //       // console.log({ message: "user created", createdUser });
-      //       // let newUser = User.findOne({emirates : })
-      //       File.updateOne(
-      //         { uniqueId: fileNumber },
-      //         {
-      //           $push: {
-      //             familyMembers: {
-      //               memberEmiratesId: hashedemiratesId,
-      //               connected: false,
-      //             },
-      //           },
-      //         },
-      //         (err) => {
-      //           if (err) {
-      //             throw new Error("Error creating the User");
-      //           } else {
-      //             res.json({
-      //               success: true,
-      //               message: "You would be soon verified by the Clinic",
-      //             });
-      //           }
-      //         }
-      //       );
-      //     }
-      //   });
-      // }
-
-      // } catch (err) {
     } catch (err) {
       console.log(err, "i am error");
-      // res.json({
-      //   success: false,
-      //   message: err.message,
-      // });
+
       res.json({
         serverError: 1,
 
@@ -764,21 +620,9 @@ const emailVerify = async (req, res) => {
                     "emiratesId",
                     "phoneNumber",
                   ]);
-                  // res.json({
-                  //   success: true,
-                  //   message: "Phone Number verified",
-                  //   fileData: {
-                  //     // fileNumber: foundFile.uniqueId,
-                  //     // city: foundFile.city,
-                  //     // familyMembers: foundFile?.familyMembers?.length,
-                  //     // emiratesId: foundFile.emiratesId,
-                  //     // phoneNumber: foundFile.phoneNumber,
-                  //     fileId: foundFile._id,
-                  //   },
-                  // });
+
                   res.json({
                     serverError: 0,
-
                     message: "Phone Number verified",
                     data: {
                       fileId: foundFile._id,
@@ -795,7 +639,6 @@ const emailVerify = async (req, res) => {
         // throw new Error("Otp is wrong");
         res.json({
           serverError: 0,
-
           message: "Otp is wrong",
           data: {
             success: 0,
@@ -870,14 +713,14 @@ const fileVerify = async (req, res) => {
 };
 
 const login = async (req, res, next) => {
-  const { fileNumber, password, emiratesId, isFileNumber } = req.body;
+  const { phoneNumber, password, emiratesId, isPhoneNumber } = req.body;
   let existingUser;
 
   // console.log(email, password);
 
-  if (isFileNumber === "0") {
+  if (isPhoneNumber === "0") {
     try {
-      existingUser = await File.findOne({ emiratesId: emiratesId });
+      existingUser = await File.findOne({ uniqueId: emiratesId });
       console.log(existingUser, "i am existing user");
 
       if (!existingUser) {
@@ -1001,13 +844,11 @@ const login = async (req, res, next) => {
         // });
         res.json({
           serverError: 0,
-
           message: "you are login success fully",
           data: {
-            id: existingUser._id,
+            fileId: existingUser._id,
             role: existingUser.role,
             access_token: access_token,
-            fileNumber: existingUser.fileNumber,
             familyMembers,
             success: 1,
           },
@@ -1019,7 +860,6 @@ const login = async (req, res, next) => {
       // res.json({ success: false, message: err.message });
       res.json({
         serverError: 1,
-
         message: err.message,
         data: {
           success: 0,
@@ -1029,25 +869,27 @@ const login = async (req, res, next) => {
     }
   } else {
     try {
-      existingUser = await File.findOne({ uniqueId: fileNumber });
+      existingUser = await File.findOne({ phoneNumber: phoneNumber });
 
       if (!existingUser) {
         // throw new Error("Account does not exist");
         res.json({
           serverError: 0,
 
-          message: "User not Found",
+          message: "Family account not found",
           data: {
             success: 0,
           },
         });
         return;
       } else {
+        // let foundFamilyAccount = File.fineOne({
+        //   phoneNumber: existingUser?.phoneNumber,
+        // });
         if (existingUser.clinicVerified === false) {
           // throw new Error("Your account has not verified from the clinic yet");
           res.json({
             serverError: 0,
-
             message: "Your account has not verified from the clinic yet",
             data: {
               success: 0,
@@ -1057,9 +899,6 @@ const login = async (req, res, next) => {
         }
 
         if (existingUser.active === false) {
-          // throw new Error(
-          //   "Your account has not been activated from the clinic yet"
-          // );
           res.json({
             serverError: 0,
 
@@ -1075,21 +914,7 @@ const login = async (req, res, next) => {
           // throw new Error("You have not verified your phone number");
           res.json({
             serverError: 0,
-
             message: "You have not verified your phone number",
-            data: {
-              success: 0,
-            },
-          });
-          return;
-        }
-
-        if (existingUser.phoneVerified === false) {
-          // throw new Error("Your have not verified your phone number");
-          res.json({
-            serverError: 0,
-
-            message: "Your have not verified your phone number",
             data: {
               success: 0,
             },
@@ -1112,7 +937,6 @@ const login = async (req, res, next) => {
           // throw new Error("Wrong Password");
           res.json({
             serverError: 0,
-
             message: "Wrong Password",
             data: {
               success: 0,
@@ -1165,13 +989,11 @@ const login = async (req, res, next) => {
 
         res.json({
           serverError: 0,
-
           message: "you are login success fully",
           data: {
-            id: existingUser._id,
+            fileId: existingUser._id,
             role: existingUser.role,
             access_token: access_token,
-            fileNumber: existingUser.fileNumber,
             familyMembers,
             success: 1,
           },
@@ -1183,7 +1005,6 @@ const login = async (req, res, next) => {
       // res.json({ success: false, message: err.message });
       res.json({
         serverError: 1,
-
         message: err.message,
         data: {
           success: 0,
@@ -1435,13 +1256,53 @@ const requestNewOtp = async (req, res) => {
     upperCaseAlphabets: false,
     specialChars: false,
   });
-  sendPhoneOtp(phoneNumber, otp);
-
-  res.json({
-    errorCode: 0,
-    message: "OTP Sent to Phone Number",
-    data: { success: 1 },
+  let foundForgotPhone = await Filephoneverified.findOne({
+    fileId: phoneExist._id,
   });
+  if (foundForgotPhone) {
+    Filephoneverified.deleteOne({ fileId: phoneExist._id }, async (err) => {
+      if (err) {
+        throw new Error("Error deleting the OTP Session");
+      } else {
+        console.log("deleted previous");
+      }
+    });
+  }
+  console.log(phoneExist);
+  let createdForgotOtp = await Filephoneverified({
+    otp: otp,
+    fileId: phoneExist._id,
+    created: Date.now(),
+    expires: Date.now() + 600000,
+  });
+  createdForgotOtp.save((err) => {
+    if (err) {
+      console.log(err),
+        res.json({
+          serverError: 1,
+
+          message: "Somthing went wrong",
+          data: {
+            success: 0,
+          },
+        });
+      return;
+    } else {
+      sendPhoneOtp(phoneNumber, otp);
+
+      res.json({
+        serverError: 0,
+
+        message: "OTP Sent to Phone Number",
+        data: {
+          fileId: phoneExist._id,
+          success: 1,
+        },
+      });
+      return;
+    }
+  });
+
   return;
 };
 
