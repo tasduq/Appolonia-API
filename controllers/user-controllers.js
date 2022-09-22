@@ -713,6 +713,7 @@ const fileVerify = async (req, res) => {
 };
 
 const login = async (req, res, next) => {
+  console.log(req.body);
   const { phoneNumber, password, emiratesId, isPhoneNumber } = req.body;
   let existingUser;
 
@@ -727,7 +728,6 @@ const login = async (req, res, next) => {
         // throw new Error("Account does not exist");
         res.json({
           serverError: 0,
-
           message: "Account does not exist",
           data: {
             success: 0,
