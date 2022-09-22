@@ -77,7 +77,8 @@ const checkPatient = async (req, res) => {
         res.json({
           serverError: 0,
 
-          message: "No account is registered with that File Number",
+          message:
+            "No account is registered with that File Number or your account is not clinic verified",
           data: {
             success: 0,
           },
@@ -138,7 +139,7 @@ const checkPatient = async (req, res) => {
         });
       }
     } else {
-      let user = await User.findOne({ uniqueId1: fileNumber });
+      let user = await User.findOne({ uniqueId2: emiratesId });
       if (!user) {
         res.json({
           serverError: 0,
@@ -253,27 +254,26 @@ const signup = async (req, res, next) => {
   if (isExisting === "0") {
     try {
       let existingUser;
-      existingUser = await User.findOne({ uniqueId1: emiratesId });
+      // existingUser = await User.findOne({ uniqueId1: emiratesId });
+
+      // if (existingUser) {
+      //   // throw new Error("User Already Exist");
+      //   res.json({
+      //     serverError: 0,
+      //     message: "User Already Exist",
+      //     data: {
+      //       success: 0,
+      //     },
+      //   });
+      //   return;
+      // }
+
+      existingUser = await User.findOne({ uniqueId2: emiratesId });
 
       if (existingUser) {
         // throw new Error("User Already Exist");
         res.json({
           serverError: 0,
-          message: "User Already Exist",
-          data: {
-            success: 0,
-          },
-        });
-        return;
-      }
-
-      existingUser = await User.findOne({ uniqueId: emiratesId });
-
-      if (existingUser) {
-        // throw new Error("User Already Exist");
-        res.json({
-          serverError: 0,
-
           message: "User Already Exist",
           data: {
             success: 0,
