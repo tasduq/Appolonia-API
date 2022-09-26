@@ -41,6 +41,7 @@ const getUserdata = async (req, res) => {
       message: "User found",
       data: {
         success: 1,
+        userData: foundUser,
       },
     });
     return;
@@ -858,6 +859,10 @@ const login = async (req, res, next) => {
         //   fileNumber: existingUser.fileNumber,
         //   familyMembers,
         // });
+        let familyHead = familyMembers.find(
+          (member) => member.uniqueId2 === existingUser.uniqueId
+        );
+        console.log(familyHead, "i am head");
         res.json({
           serverError: 0,
           message: "you are login success fully",
