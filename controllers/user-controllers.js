@@ -36,9 +36,24 @@ const getUserdata = async (req, res) => {
   const { userId } = req.body;
   const foundUser = await User.findOne({ _id: userId });
   if (foundUser) {
-    res.json({ success: true, message: "User found", userData: foundUser });
+    res.json({
+      serverError: 0,
+      message: "User found",
+      data: {
+        success: 1,
+      },
+    });
+    return;
   } else {
-    res.json({ success: false, message: "User not found" });
+    // res.json({ success: false, message: "User not found" });
+    res.json({
+      serverError: 0,
+      message: "User not found",
+      data: {
+        success: 0,
+      },
+    });
+    return;
   }
 };
 
@@ -957,10 +972,7 @@ const login = async (req, res, next) => {
         }
 
         let familyIds = existingUser.familyMembers.filter((member) => {
-          // if (member.connected === true) {
-          //   console.log(member);
           return member.connected === true && member;
-          // }
         });
 
         familyIds = familyIds.map((member) => member.userId);
@@ -990,6 +1002,7 @@ const login = async (req, res, next) => {
           serverError: 0,
           message: "you are login success fully",
           data: {
+            familyHeadId: "",
             fileId: existingUser._id,
             role: existingUser.role,
             access_token: access_token,

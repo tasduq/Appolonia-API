@@ -33,29 +33,50 @@ const getFileFamilyMembers = async (req, res) => {
   // console.log(decryptedFamilyMembers, "i am family");
   console.log(familyMembers, "i am family");
 
-  let usersId = familyMembers?.filter((member) => {
-    member.connected === true && member.userId;
+  let usersId = [];
+
+  for (member of familyMembers) {
+    if (member.connected === true) {
+      usersId.push(member.userId);
+    }
+  }
+
+  console.log(usersId, "i am ids");
+
+  let connectedFamily = await User.find({
+    _id: { $in: usersId },
   });
+  console.log(connectedFamily, "i am connectedfamily");
 
-  let connectedFamily = await User.find(
-    {
-      _id: { $in: usersId },
-    },
-    ["firstName", "lastName", "image", "uniqueId2", "uniqueId1"]
-  );
-
-  connectedFamily = connectedFamily.map((member) => {
-    return {
-      ...member,
+  let yoo = [];
+  for (member of connectedFamily) {
+    yoo.push({
+      firstName: member.firstName,
+      lastName: member.lastName,
       fileNumber: member.uniqueId1,
       emiratesId: member.uniqueId2,
-    };
-  });
+      userId: member._id,
+    });
+  }
+
+  console.log(yoo);
 
   if (foundFile) {
     res.json({
-      success: true,
-      foundFamily: connectedFamily,
+      serverError: 0,
+      message: "File Found",
+      data: {
+        success: 1,
+        foundFamily: yoo,
+      },
+    });
+  } else {
+    res.json({
+      serverError: 0,
+      message: "File not found. File id may be incorrect",
+      data: {
+        success: 0,
+      },
     });
   }
 };

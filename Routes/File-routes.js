@@ -11,6 +11,6 @@ router.post(
   fileController.getFileFamilyMembers
 );
 router.post("/connectmembertofile", fileController.connectMemberToFile);
-router.post("/addtofamily", authCheck, fileController.addFamilyMember);
+router.post("/addtofamily", fileController.addFamilyMember);
 
 module.exports = router;
