@@ -10,34 +10,47 @@ const getFileFamilyMembers = async (req, res) => {
 
   let foundFile = await File.findOne({ _id: fileId }, "familyMembers");
   let { familyMembers } = foundFile;
-  let decryptedFamilyMembers = [];
-  for (member of familyMembers) {
-    console.log("i am member", member);
-    if (member?.connected === true) {
-      let yoo = member;
-      console.log(yoo, "i am yoo");
-      let decryptedemiratesId;
-      decryptedemiratesId = CryptoJS.AES.decrypt(yoo.memberEmiratesId, "love");
-      decryptedemiratesId = decryptedemiratesId.toString(CryptoJS.enc.Utf8);
-      console.log(decryptedemiratesId, "i am decrypted");
-      yoo = {
-        ...yoo,
-        memberEmiratesId: decryptedemiratesId,
-      };
-      console.log(yoo, "i am yoo");
-      // return yoo;
-      decryptedFamilyMembers = [...decryptedFamilyMembers, decryptedemiratesId];
-    }
-  }
+  // let decryptedFamilyMembers = [];
+  // for (member of familyMembers) {
+  //   console.log("i am member", member);
+  //   if (member?.connected === true) {
+  //     let yoo = member;
+  //     console.log(yoo, "i am yoo");
+  //     let decryptedemiratesId;
+  //     decryptedemiratesId = CryptoJS.AES.decrypt(yoo.memberEmiratesId, "love");
+  //     decryptedemiratesId = decryptedemiratesId.toString(CryptoJS.enc.Utf8);
+  //     console.log(decryptedemiratesId, "i am decrypted");
+  //     yoo = {
+  //       ...yoo,
+  //       memberEmiratesId: decryptedemiratesId,
+  //     };
+  //     console.log(yoo, "i am yoo");
+  //     // return yoo;
+  //     decryptedFamilyMembers = [...decryptedFamilyMembers, decryptedemiratesId];
+  //   }
+  // }
 
-  console.log(decryptedFamilyMembers, "i am family");
+  // console.log(decryptedFamilyMembers, "i am family");
+  console.log(familyMembers, "i am family");
+
+  let usersId = familyMembers?.filter((member) => {
+    member.connected === true && member.userId;
+  });
 
   let connectedFamily = await User.find(
     {
-      uniqueId2: { $in: decryptedFamilyMembers },
+      _id: { $in: usersId },
     },
-    ["firstName", "lastName", "image", "uniqueId2"]
+    ["firstName", "lastName", "image", "uniqueId2", "uniqueId1"]
   );
+
+  connectedFamily = connectedFamily.map((member) => {
+    return {
+      ...member,
+      fileNumber: member.uniqueId1,
+      emiratesId: member.uniqueId2,
+    };
+  });
 
   if (foundFile) {
     res.json({
@@ -102,7 +115,7 @@ const addFamilyMember = async (req, res) => {
 
     if (existingUser) {
       res.json({
-        errorCode: 0,
+        serverError: 0,
         message: "User file number already exist",
         data: {
           success: 0,
@@ -115,7 +128,7 @@ const addFamilyMember = async (req, res) => {
 
     if (existingUser) {
       res.json({
-        errorCode: 0,
+        serverError: 0,
         message: "Emirates Id already exist",
         data: {
           success: 0,
@@ -155,7 +168,7 @@ const addFamilyMember = async (req, res) => {
       uniqueId2: emiratesId,
     });
 
-    newMember.save((err) => {
+    newMember.save((err, userDoc) => {
       if (err) {
         console.log(err);
         throw new Error("Error saving the user");
@@ -168,6 +181,7 @@ const addFamilyMember = async (req, res) => {
                 memberEmiratesId: hashedemiratesId,
                 uniqueId: emiratesId,
                 connected: false,
+                userId: userDoc._id,
               },
             },
           },
@@ -191,7 +205,7 @@ const addFamilyMember = async (req, res) => {
     });
   } catch (err) {
     res.json({
-      errorCode: 1,
+      serverError: 1,
       message: err.message,
       data: {
         success: 0,

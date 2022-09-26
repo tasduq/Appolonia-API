@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post(
   "/getfilefamilymembers",
-  authCheck,
+  // authCheck,
   fileController.getFileFamilyMembers
 );
 router.post("/connectmembertofile", fileController.connectMemberToFile);

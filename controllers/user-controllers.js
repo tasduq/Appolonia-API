@@ -42,6 +42,8 @@ const getUserdata = async (req, res) => {
   }
 };
 
+const updateUserProfile = () => {};
+
 const checkPatient = async (req, res) => {
   console.log(req.body);
   const { isFileNumber, fileNumber, emiratesId } = req.body;
@@ -362,7 +364,7 @@ const signup = async (req, res, next) => {
         uniqueId: emiratesId,
       });
 
-      createdUser.save((err) => {
+      createdUser.save((err, userDoc) => {
         if (err) {
           console.log(err);
           throw new Error("Error creating the User");
@@ -416,6 +418,7 @@ const signup = async (req, res, next) => {
                           memberEmiratesId: hashedemiratesId,
                           uniqueId: emiratesId,
                           connected: false,
+                          userId: userDoc._id,
                         },
                       },
                     },
@@ -447,7 +450,7 @@ const signup = async (req, res, next) => {
       console.log(err, "i am error");
 
       res.json({
-        errorCode: 1,
+        serverError: 1,
         message: err.message,
         data: {
           success: 0,
@@ -817,10 +820,10 @@ const login = async (req, res, next) => {
           // }
         });
 
-        familyIds = familyIds.map((member) => member.memberEmiratesId);
+        familyIds = familyIds.map((member) => member.userId);
         console.log(familyIds, "We are family ids");
 
-        let familyMembers = await User.find({ emiratesId: { $in: familyIds } });
+        let familyMembers = await User.find({ _id: { $in: familyIds } });
         console.log(familyMembers, "we are members");
 
         // let decryptedFileNumber;
@@ -960,10 +963,10 @@ const login = async (req, res, next) => {
           // }
         });
 
-        familyIds = familyIds.map((member) => member.memberEmiratesId);
+        familyIds = familyIds.map((member) => member.userId);
         console.log(familyIds, "We are family ids");
 
-        let familyMembers = await User.find({ emiratesId: { $in: familyIds } });
+        let familyMembers = await User.find({ _id: { $in: familyIds } });
         console.log(familyMembers, "we are members");
 
         // let decryptedFileNumber;
@@ -1206,7 +1209,7 @@ const changePassword = async (req, res) => {
           if (!err) {
             // return res.json({ success: true, message: "Password Updated" });
             res.json({
-              errorCode: 0,
+              serverError: 0,
               message: "Password Updated",
               data: {
                 success: 1,
@@ -1221,7 +1224,7 @@ const changePassword = async (req, res) => {
     }
   } catch (err) {
     res.json({
-      errorCode: 1,
+      serverError: 1,
       message: err.message,
       data: {
         success: 0,
@@ -1236,7 +1239,7 @@ const requestNewOtp = async (req, res) => {
   let phoneExist = await File.findOne({ phoneNumber: phoneNumber }, "_id");
   if (!phoneExist) {
     res.json({
-      errorCode: 0,
+      serverError: 0,
       message: "Phonenumber is not registered with us",
       data: {
         success: 0,
@@ -1533,6 +1536,16 @@ const contact = async (req, res) => {
     }
   });
 };
+const logout = async (req, res) => {
+  console.log(req.body);
+  res.json({
+    serverError: 0,
+    message: "You are logged out",
+    data: {
+      success: 1,
+    },
+  });
+};
 
 module.exports = {
   signup,
@@ -1548,4 +1561,6 @@ module.exports = {
   contact,
   getUserdata,
   changePassword,
+  logout,
+  updateUserProfile,
 };

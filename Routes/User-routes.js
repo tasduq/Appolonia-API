@@ -16,6 +16,7 @@ router.post("/fileverify", usersController.fileVerify);
 router.post("/newotp", usersController.requestNewOtp);
 
 router.post("/login", usersController.login);
+router.post("/logout", usersController.logout);
 router.post("/forgotpassword", usersController.requestForgotOtp);
 
 router.post("/verifyforgototp", usersController.verifyForgotOtp);
@@ -24,5 +25,6 @@ router.post("/newpasswordforgot", usersController.newPassword);
 router.post("/contact", upload.array("files"), usersController.contact);
 router.post("/profileget", usersController.getUserdata);
 router.post("/changepassword", usersController.changePassword);
+router.post("/updateprofile", usersController.updateUserProfile);
 
 module.exports = router;

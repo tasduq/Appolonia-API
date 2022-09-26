@@ -8,7 +8,7 @@ module.exports = (req, res, next) => {
 
   if (!authorization) {
     return res.json({
-      errorCode: 0,
+      serverError: 0,
       authError: 0,
       data: { success: 0 },
       message: "You must be login",
@@ -20,7 +20,7 @@ module.exports = (req, res, next) => {
     if (err) {
       console.log(err);
       return res.json({
-        errorCode: 0,
+        serverError: 0,
         authError: 0,
         data: { success: 0 },
         message: "Token Expired. Login again",
