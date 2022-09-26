@@ -867,6 +867,7 @@ const login = async (req, res, next) => {
           serverError: 0,
           message: "you are login success fully",
           data: {
+            familyHeadId: familyHead?._id,
             fileId: existingUser._id,
             role: existingUser.role,
             access_token: access_token,
@@ -1002,12 +1003,15 @@ const login = async (req, res, next) => {
         //   fileNumber: existingUser.fileNumber,
         //   familyMembers,
         // });
-
+        let familyHead = familyMembers.find(
+          (member) => member.uniqueId2 === existingUser.uniqueId
+        );
+        console.log(familyHead, "i am head");
         res.json({
           serverError: 0,
           message: "you are login success fully",
           data: {
-            familyHeadId: "",
+            familyHeadId: familyHead?._id,
             fileId: existingUser._id,
             role: existingUser.role,
             access_token: access_token,
