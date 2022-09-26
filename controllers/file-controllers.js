@@ -10,27 +10,39 @@ const getFileFamilyMembers = async (req, res) => {
 
   let foundFile = await File.findOne({ _id: fileId }, "familyMembers");
   let { familyMembers } = foundFile;
-  //   let decryptedFamilyMembers = familyMembers.map((member) => {
-  //     let yoo = member;
-  //     console.log(yoo, "i am yoo");
-  //     let decryptedemiratesId;
-  //     decryptedemiratesId = CryptoJS.AES.decrypt(yoo.memberEmiratesId, "love");
-  //     decryptedemiratesId = decryptedemiratesId.toString(CryptoJS.enc.Utf8);
-  //     console.log(decryptedemiratesId, "i am decrypted");
-  //     yoo = {
-  //       ...yoo,
-  //       memberEmiratesId: decryptedemiratesId,
-  //     };
-  //     console.log(yoo, "i am yoo");
-  //     return yoo;
-  //   });
+  let decryptedFamilyMembers = [];
+  for (member of familyMembers) {
+    console.log("i am member", member);
+    if (member?.connected === true) {
+      let yoo = member;
+      console.log(yoo, "i am yoo");
+      let decryptedemiratesId;
+      decryptedemiratesId = CryptoJS.AES.decrypt(yoo.memberEmiratesId, "love");
+      decryptedemiratesId = decryptedemiratesId.toString(CryptoJS.enc.Utf8);
+      console.log(decryptedemiratesId, "i am decrypted");
+      yoo = {
+        ...yoo,
+        memberEmiratesId: decryptedemiratesId,
+      };
+      console.log(yoo, "i am yoo");
+      // return yoo;
+      decryptedFamilyMembers = [...decryptedFamilyMembers, decryptedemiratesId];
+    }
+  }
 
-  //   console.log(decryptedFamilyMembers, "i am family");
+  console.log(decryptedFamilyMembers, "i am family");
+
+  let connectedFamily = await User.find(
+    {
+      uniqueId2: { $in: decryptedFamilyMembers },
+    },
+    ["firstName", "lastName", "image", "uniqueId2"]
+  );
 
   if (foundFile) {
     res.json({
       success: true,
-      foundFamily: familyMembers,
+      foundFamily: connectedFamily,
     });
   }
 };
@@ -67,7 +79,129 @@ const connectMemberToFile = async (req, res, next) => {
   );
 };
 
+const addFamilyMember = async (req, res) => {
+  console.log(req.body);
+  const {
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    emiratesId,
+    role,
+    countryCode,
+    city,
+    gender,
+    dob,
+    fileNumber,
+  } = req.body;
+
+  try {
+    let existingUser;
+    existingUser = await User.findOne({ uniqueId1: fileNumber });
+    console.log(existingUser, "i am existing");
+
+    if (existingUser) {
+      res.json({
+        errorCode: 0,
+        message: "User file number already exist",
+        data: {
+          success: 0,
+        },
+      });
+      return;
+    }
+
+    existingUser = await User.findOne({ uniqueId2: emiratesId });
+
+    if (existingUser) {
+      res.json({
+        errorCode: 0,
+        message: "Emirates Id already exist",
+        data: {
+          success: 0,
+        },
+      });
+      return;
+    }
+
+    let hashedemiratesId;
+    let hashedfileNumber;
+
+    try {
+      hashedemiratesId = CryptoJS.AES.encrypt(emiratesId, "love").toString();
+      hashedfileNumber = CryptoJS.AES.encrypt(fileNumber, "love").toString();
+      console.log(hashedemiratesId, "i am emirates");
+    } catch (err) {
+      console.log("Something went wrong while Encrypting Data", err);
+
+      throw new Error("Something went wrong while Encrypting Data");
+    }
+
+    // let existingFile = File.findOne({phoneNumber : phoneNumber , "familyMembers.emiratesId" : emiratesId })
+
+    let newMember = new User({
+      firstName,
+      lastName,
+      email: email,
+      phoneNumber: phoneNumber,
+      emiratesId: hashedemiratesId,
+      role,
+      countryCode,
+      city,
+      gender,
+      dob,
+      fileNumber: hashedfileNumber,
+      uniqueId1: fileNumber,
+      uniqueId2: emiratesId,
+    });
+
+    newMember.save((err) => {
+      if (err) {
+        console.log(err);
+        throw new Error("Error saving the user");
+      } else {
+        File.updateOne(
+          { phoneNumber: phoneNumber },
+          {
+            $push: {
+              familyMembers: {
+                memberEmiratesId: hashedemiratesId,
+                uniqueId: emiratesId,
+                connected: false,
+              },
+            },
+          },
+          (err) => {
+            if (err) {
+              throw new Error("Error creating the User");
+            } else {
+              res.json({
+                serverError: 0,
+                message:
+                  "Family Member added. You would be notified from the clinic soon",
+                data: {
+                  success: 1,
+                },
+              });
+              return;
+            }
+          }
+        );
+      }
+    });
+  } catch (err) {
+    res.json({
+      errorCode: 1,
+      message: err.message,
+      data: {
+        success: 0,
+      },
+    });
+  }
+};
+
 module.exports = {
   getFileFamilyMembers,
   connectMemberToFile,
+  addFamilyMember,
 };

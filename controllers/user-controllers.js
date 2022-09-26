@@ -76,7 +76,6 @@ const checkPatient = async (req, res) => {
         // throw new Error("No account is registered with that File Number");
         res.json({
           serverError: 0,
-
           message:
             "No account is registered with that File Number or your account is not clinic verified",
           data: {
@@ -415,6 +414,7 @@ const signup = async (req, res, next) => {
                       $push: {
                         familyMembers: {
                           memberEmiratesId: hashedemiratesId,
+                          uniqueId: emiratesId,
                           connected: false,
                         },
                       },
@@ -802,11 +802,9 @@ const login = async (req, res, next) => {
 
         let access_token;
         try {
-          access_token = jwt.sign(
-            { userId: existingUser._id, emiratesId: existingUser.emiratesId },
-            JWTKEY,
-            { expiresIn: "1h" }
-          );
+          access_token = jwt.sign({ userId: existingUser._id }, JWTKEY, {
+            expiresIn: "1h",
+          });
         } catch (err) {
           console.log(err);
           throw new Error("Something went wrong while creating token");
@@ -947,11 +945,9 @@ const login = async (req, res, next) => {
 
         let access_token;
         try {
-          access_token = jwt.sign(
-            { userId: existingUser._id, emiratesId: existingUser.emiratesId },
-            JWTKEY,
-            { expiresIn: "1h" }
-          );
+          access_token = jwt.sign({ userId: existingUser._id }, JWTKEY, {
+            expiresIn: "1h",
+          });
         } catch (err) {
           console.log(err);
           throw new Error("Something went wrong while creating token");
@@ -1170,13 +1166,13 @@ const newPassword = async (req, res) => {
 const changePassword = async (req, res) => {
   console.log(req.body);
 
-  const { passwordUpdate, id } = req.body;
+  const { passwordUpdate, fileId } = req.body;
   const { oldPassword, newPassword } = passwordUpdate;
 
   let existingUser;
 
   try {
-    existingUser = await File.findOne({ _id: id });
+    existingUser = await File.findOne({ _id: fileId });
     console.log(existingUser);
     if (!existingUser) {
       throw new Error("Account not found");
@@ -1204,7 +1200,7 @@ const changePassword = async (req, res) => {
       }
 
       File.updateOne(
-        { _id: id },
+        { _id: fileId },
         { $set: { password: hashedPassword } },
         function (err) {
           if (!err) {
