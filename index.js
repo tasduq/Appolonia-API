@@ -8,6 +8,8 @@ const fileRoutes = require("./Routes/File-routes");
 const scansRoutes = require("./Routes/Scans-routes");
 const settingRoutes = require("./Routes/Setting-routes");
 const chatRoutes = require("./Routes/Chat-routes");
+const libraryRoutes = require("./Routes/Library-routes");
+const customPagesRoutes = require("./Routes/Custompage-routes");
 
 const PORT = process.env.PORT || 3001;
 const { db } = require("./Config/config");
@@ -46,6 +48,8 @@ app.use("/api/file", fileRoutes);
 app.use("/api/setting", settingRoutes);
 app.use("/api/scans", scansRoutes);
 app.use("/api/chat", chatRoutes);
+app.use("/api/library", libraryRoutes);
+app.use("/api/custompages", customPagesRoutes);
 
 app.listen(PORT, () => {
   console.log("listening on " + PORT);

@@ -12,23 +12,26 @@ const newChat = async (req, res) => {
       members: { $in: [senderId] },
     });
 
-    let foundConversation = conversations.map((convo) =>
-      convo.members.some((member) => member === receiverId)
-    );
+    // let foundConversation = conversations.map((convo) =>
+    //   convo.members.some((member) => member === receiverId)
+    // );
+    let foundConversation;
+    for (convo of conversations) {
+      foundConversation = convo.members.some((member) => member === receiverId);
+    }
 
     console.log(foundConversation, "Found conversations");
-    if (foundConversation?.length > 0) {
-      if (foundConversation[0] === true) {
-        res.json({
-          errorCode: 0,
-          message: "You already have a conversation on going",
-          data: {
-            success: 0,
-            chatExist: 1,
-          },
-        });
-        return;
-      }
+
+    if (foundConversation === true) {
+      res.json({
+        errorCode: 0,
+        message: "You already have a conversation on going",
+        data: {
+          success: 0,
+          chatExist: 1,
+        },
+      });
+      return;
     }
 
     let createdConversation = new Conversation({

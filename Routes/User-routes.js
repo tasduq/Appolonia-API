@@ -26,5 +26,6 @@ router.post("/contact", upload.array("files"), usersController.contact);
 router.post("/profileget", usersController.getUserdata);
 router.post("/changepassword", usersController.changePassword);
 router.post("/updateprofile", usersController.updateUserProfile);
+router.post("/deleteaccount", usersController.deleteAccount);
 
 module.exports = router;

@@ -16,6 +16,9 @@ const File = require("../Models/File");
 const Contact = require("../Models/Contact");
 const Filephoneverified = require("../Models/Filephoneverification");
 const Forgotphoneverified = require("../Models/Forgotphonrverification");
+const Conversation = require("../Models/Conversations");
+const Message = require("../Models/Messages");
+const Scans = require("../Models/Scans");
 
 // const accountSid = "AC05d6ccacda0201d3e850b4ce60c773af";
 // const authToken = "5f7f59ab3a6bdf8fcc2d810e6be45f98";
@@ -34,8 +37,30 @@ const getUsers = async (req, res, next) => {
 
 const getUserdata = async (req, res) => {
   const { userId } = req.body;
-  const foundUser = await User.findOne({ _id: userId });
+  let foundUser = await User.findOne({ _id: userId });
+  console.log(foundUser, "i am user");
+
   if (foundUser) {
+    // let decryptedFileNumber;
+    // decryptedFileNumber = CryptoJS.AES.decrypt(foundUser?.fileNumber, "love");
+    // decryptedFileNumber = decryptedFileNumber.toString(CryptoJS.enc.Utf8);
+    // let decryptedEmiratesId;
+    // decryptedEmiratesId = CryptoJS.AES.decrypt(foundUser?.emiratesId, "love");
+    // decryptedEmiratesId = decryptedEmiratesId.toString(CryptoJS.enc.Utf8);
+    // console.log(decryptedFileNumber, decryptedEmiratesId, "decrupted");
+    foundUser = {
+      _id: foundUser._id,
+      firstName: foundUser.firstName,
+      lastName: foundUser.lastName,
+      email: foundUser.email,
+      phoneNumber: foundUser.phoneNumber,
+      emiratesId: foundUser.uniqueId2,
+      fileNumber: foundUser.uniqueId1,
+      gender: foundUser.gender,
+      city: foundUser.city,
+      dob: foundUser.dob,
+      role: foundUser.role,
+    };
     res.json({
       serverError: 0,
       message: "User found",
@@ -58,7 +83,121 @@ const getUserdata = async (req, res) => {
   }
 };
 
-const updateUserProfile = () => {};
+const updateUserProfile = async (req, res) => {
+  console.log(req.body);
+  const {
+    firstName,
+    lastName,
+    emiratesId,
+    fileNumber,
+    gender,
+    dob,
+    email,
+    city,
+    isEmiratesIdChanged,
+    isFileNumberChanged,
+    isFamilyHead,
+    userId,
+    fileId,
+  } = req.body;
+
+  if (isFileNumberChanged === "1") {
+    let existing = await User.findOne({ uniqueId1: fileNumber });
+    if (existing) {
+      res.json({
+        serverError: 0,
+        message: "File Number Already Exist",
+        data: {
+          success: 0,
+        },
+      });
+      return;
+    }
+  }
+
+  if (isEmiratesIdChanged === "1") {
+    let existing = await User.findOne({ uniqueId2: emiratesId });
+    if (existing) {
+      res.json({
+        serverError: 0,
+        message: "Emirates Id Already Exist",
+        data: {
+          success: 0,
+        },
+      });
+      return;
+    }
+  }
+
+  let hashedemiratesId;
+  let hashedFileNumber;
+
+  try {
+    hashedemiratesId = CryptoJS.AES.encrypt(emiratesId, "love").toString();
+    hashedFileNumber = CryptoJS.AES.encrypt(fileNumber, "love").toString();
+    console.log(hashedemiratesId, hashedFileNumber, "i am emirates");
+  } catch (err) {
+    console.log("Something went wrong while Encrypting Data", err);
+
+    throw new Error("Something went wrong while Encrypting Data");
+  }
+
+  let data = {
+    firstName,
+    lastName,
+    emiratesId: hashedemiratesId,
+    fileNumber: hashedFileNumber,
+    gender,
+    dob,
+    email,
+    city,
+    uniqueId1: fileNumber,
+    uniqueId2: emiratesId,
+  };
+
+  try {
+    User.updateOne({ _id: userId }, data, { new: true }, (err) => {
+      if (err) {
+        console.log(err);
+        throw new Error("Error updating the user");
+      } else {
+        if (isFamilyHead === "1") {
+          File.updateOne(
+            { _id: fileId },
+            { $set: { uniqueId: emiratesId, emiratesId: hashedemiratesId } },
+            (err) => {
+              if (err) {
+                console.log(err);
+                throw new Error("Error updating the user");
+              } else {
+                res.json({
+                  serverError: 0,
+                  message: "User data updated",
+                  data: { success: 1 },
+                });
+              }
+            }
+          );
+        } else {
+          res.json({
+            serverError: 0,
+            message: "User data updated",
+            data: { success: 1 },
+          });
+        }
+      }
+    });
+  } catch (err) {
+    console.log(err);
+    res.json({
+      serverError: 1,
+      message: err.message,
+      data: {
+        success: 0,
+      },
+    });
+  }
+};
 
 const checkPatient = async (req, res) => {
   console.log(req.body);
@@ -829,18 +968,18 @@ const login = async (req, res, next) => {
           throw new Error("Something went wrong while creating token");
         }
 
-        let familyIds = existingUser.familyMembers.filter((member) => {
-          // if (member.connected === true) {
-          //   console.log(member);
-          return member.connected === true && member;
-          // }
-        });
+        // let familyIds = existingUser.familyMembers.filter((member) => {
+        //   // if (member.connected === true) {
+        //   //   console.log(member);
+        //   return member.connected === true && member;
+        //   // }
+        // });
 
-        familyIds = familyIds.map((member) => member.userId);
-        console.log(familyIds, "We are family ids");
+        // familyIds = familyIds.map((member) => member.userId);
+        // console.log(familyIds, "We are family ids");
 
-        let familyMembers = await User.find({ _id: { $in: familyIds } });
-        console.log(familyMembers, "we are members");
+        // let familyMembers = await User.find({ _id: { $in: familyIds } });
+        // console.log(familyMembers, "we are members");
 
         // let decryptedFileNumber;
         // decryptedFileNumber = CryptoJS.AES.decrypt(
@@ -859,19 +998,20 @@ const login = async (req, res, next) => {
         //   fileNumber: existingUser.fileNumber,
         //   familyMembers,
         // });
-        let familyHead = familyMembers.find(
-          (member) => member.uniqueId2 === existingUser.uniqueId
+
+        let familyHead = existingUser?.familyMembers?.find(
+          (member) => member.uniqueId === existingUser.uniqueId
         );
         console.log(familyHead, "i am head");
         res.json({
           serverError: 0,
           message: "you are login success fully",
           data: {
-            familyHeadId: familyHead?._id,
+            familyHeadId: familyHead?.userId,
             fileId: existingUser._id,
             role: existingUser.role,
             access_token: access_token,
-            familyMembers,
+            // familyMembers,
             success: 1,
           },
         });
@@ -977,15 +1117,15 @@ const login = async (req, res, next) => {
           throw new Error("Something went wrong while creating token");
         }
 
-        let familyIds = existingUser.familyMembers.filter((member) => {
-          return member.connected === true && member;
-        });
+        // let familyIds = existingUser.familyMembers.filter((member) => {
+        //   return member.connected === true && member;
+        // });
 
-        familyIds = familyIds.map((member) => member.userId);
-        console.log(familyIds, "We are family ids");
+        // familyIds = familyIds.map((member) => member.userId);
+        // console.log(familyIds, "We are family ids");
 
-        let familyMembers = await User.find({ _id: { $in: familyIds } });
-        console.log(familyMembers, "we are members");
+        // let familyMembers = await User.find({ _id: { $in: familyIds } });
+        // console.log(familyMembers, "we are members");
 
         // let decryptedFileNumber;
         // decryptedFileNumber = CryptoJS.AES.decrypt(
@@ -1003,19 +1143,19 @@ const login = async (req, res, next) => {
         //   fileNumber: existingUser.fileNumber,
         //   familyMembers,
         // });
-        let familyHead = familyMembers.find(
-          (member) => member.uniqueId2 === existingUser.uniqueId
+        let familyHead = existingUser?.familyMembers?.find(
+          (member) => member.uniqueId === existingUser.uniqueId
         );
         console.log(familyHead, "i am head");
         res.json({
           serverError: 0,
           message: "you are login success fully",
           data: {
-            familyHeadId: familyHead?._id,
+            familyHeadId: familyHead?.userId,
             fileId: existingUser._id,
             role: existingUser.role,
             access_token: access_token,
-            familyMembers,
+            // familyMembers,
             success: 1,
           },
         });
@@ -1569,6 +1709,59 @@ const logout = async (req, res) => {
   });
 };
 
+const deleteAccount = async (req, res) => {
+  console.log(req.body);
+  const { fileId } = req.body;
+
+  try {
+    let foundFamilyIds = File.findOne({ _id: fileId }, "familyMembers");
+    foundFamilyIds = foundFamilyIds.familyMembers.map(
+      (member) => member.userId
+    );
+    console.log(foundFamilyIds);
+
+    File.updateOne(
+      { _id: fileId },
+      { $set: { active: false } },
+      async (err) => {
+        if (err) {
+          throw new Error("Some Error occuered while deleting acount");
+        } else {
+          let yoo = foundFamilyIds.map(async (memberId) => {
+            try {
+              let deletedConvo = Conversation.deleteMany({
+                members: { $in: [memberId] },
+              });
+              let deletedMessage = Message.deleteMany({ sender: memberId });
+              let deletedScans = Scans.deleteMany({ userId: memberId });
+
+              let resolved = await Promise.all([
+                deletedConvo,
+                deletedMessage,
+                deletedScans,
+              ]);
+              return resolved;
+            } catch (err) {
+              throw new Error("Somthing went wrong while deleting data");
+            }
+          });
+          let doneDeleting = await Promise.all(yoo);
+          console.log(doneDeleting);
+        }
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    res.json({
+      serverError: 1,
+      message: err.message,
+      data: {
+        success: 0,
+      },
+    });
+  }
+};
+
 module.exports = {
   signup,
   login,
@@ -1585,4 +1778,5 @@ module.exports = {
   changePassword,
   logout,
   updateUserProfile,
+  deleteAccount,
 };
