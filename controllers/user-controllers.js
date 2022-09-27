@@ -1714,11 +1714,11 @@ const deleteAccount = async (req, res) => {
   const { fileId } = req.body;
 
   try {
-    let foundFamilyIds = File.findOne({ _id: fileId }, "familyMembers");
+    let foundFamilyIds = await File.findOne({ _id: fileId }, "familyMembers");
     foundFamilyIds = foundFamilyIds.familyMembers.map(
       (member) => member.userId
     );
-    console.log(foundFamilyIds);
+    console.log(foundFamilyIds, "i am ids");
 
     File.updateOne(
       { _id: fileId },
@@ -1732,7 +1732,7 @@ const deleteAccount = async (req, res) => {
               let deletedConvo = Conversation.deleteMany({
                 members: { $in: [memberId] },
               });
-              let deletedMessage = Message.deleteMany({ sender: memberId });
+              let deletedMessage = Message.deleteMany({ senderId: memberId });
               let deletedScans = Scans.deleteMany({ userId: memberId });
 
               let resolved = await Promise.all([
@@ -1740,13 +1740,26 @@ const deleteAccount = async (req, res) => {
                 deletedMessage,
                 deletedScans,
               ]);
+              console.log(resolved, "this is resolved");
               return resolved;
             } catch (err) {
               throw new Error("Somthing went wrong while deleting data");
             }
           });
-          let doneDeleting = await Promise.all(yoo);
-          console.log(doneDeleting);
+          try {
+            let doneDeleting = await Promise.all(yoo);
+            console.log(doneDeleting);
+            res.json({
+              serverError: 0,
+              message: "Data is deleted",
+              data: {
+                success: 1,
+              },
+            });
+          } catch (err) {
+            console.log(err);
+            throw new Error("Something went wrong");
+          }
         }
       }
     );

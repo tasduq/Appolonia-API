@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 const messagesSchema = new Schema(
   {
     conversationId: { type: String },
-    sender: { type: String },
+    senderId: { type: String },
     message: { type: String },
   },
   { timestamps: true }
