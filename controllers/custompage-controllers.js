@@ -11,7 +11,7 @@ const getCustomPages = async (req, res) => {
 
   try {
     if (pageId) {
-      let foundPage = await Custompage.findOne({ _id: pageId });
+      let foundPage = await Custompage.findOne({ pageId: pageId });
       if (foundPage) {
         res.json({
           serverError: 0,
