@@ -20,16 +20,35 @@ const submitScans = async (req, res) => {
           throw new Error("Error saving scans");
         } else {
           res.json({
-            success: true,
+            errorCode: 0,
             message: "Successfully saved scans",
+            data: {
+              success: 1,
+            },
           });
+          return;
         }
       });
     } else {
-      throw new Error("Provide all the details");
+      // throw new Error("Provide all the details");
+      res.json({
+        errorCode: 0,
+        message: "Send all the data please",
+        data: {
+          success: 0,
+        },
+      });
+      return;
     }
   } catch (err) {
-    res.json({ message: err.message, success: false });
+    res.json({
+      errorCode: 1,
+      message: err.message,
+      data: {
+        success: 0,
+      },
+    });
+    return;
   }
 };
 
@@ -41,19 +60,68 @@ const getMyScans = async (req, res) => {
       let foundScans = await Scans.find({ userId: userId });
       console.log(foundScans);
       res.json({
-        success: true,
-        message: "Found Scans",
-        foundScans: foundScans,
+        errorCode: 0,
+        message: "found scans",
+        data: {
+          success: 1,
+          scans: foundScans,
+        },
       });
+      return;
     } else {
-      throw new Error("User id is missing");
+      // throw new Error("User id is missing");
+      res.json({
+        errorCode: 0,
+        message: "User id is missing",
+        data: {
+          success: 0,
+        },
+      });
+      return;
     }
   } catch (err) {
-    res.json({ success: false, message: err.message });
+    // res.json({ success: false, message: err.message });
+    res.json({
+      errorCode: 1,
+      message: err.message,
+      data: {
+        success: 0,
+      },
+    });
+    return;
+  }
+};
+
+const getAllScans = async (req, res) => {
+  const { userId } = req.body;
+  console.log(userId);
+  try {
+    let foundScans = await Scans.find({});
+    console.log(foundScans, "i am found");
+    res.json({
+      errorCode: 0,
+      message: "found scans",
+      data: {
+        success: 1,
+        scans: foundScans[foundScans?.length - 1].scanImages[0],
+      },
+    });
+    return;
+  } catch (err) {
+    // res.json({ success: false, message: err.message });
+    res.json({
+      errorCode: 1,
+      message: err.message,
+      data: {
+        success: 0,
+      },
+    });
+    return;
   }
 };
 
 module.exports = {
   submitScans,
   getMyScans,
+  getAllScans,
 };
