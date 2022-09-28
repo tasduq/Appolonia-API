@@ -1002,12 +1002,33 @@ const login = async (req, res, next) => {
         let familyHead = existingUser?.familyMembers?.find(
           (member) => member.uniqueId === existingUser.uniqueId
         );
+
+        familyHead = await User.findOne({ _id: familyHead?.userId });
+        let userScans = await Scans.find({ userId: familyHead._id }).limit(5);
+        console.log(userScans, "i am scans");
+        familyHead = {
+          _id: familyHead?._id,
+          firstName: familyHead?.firstName,
+          lastName: familyHead?._lastName,
+          emiratesId: familyHead?._uniqueId2,
+          fileNumber: familyHead?._uniqueId1,
+          phoneNumber: familyHead?.phoneNumber,
+          email: familyHead?.email,
+          gender: familyHead?.gender,
+          city: familyHead?.city,
+          assignedDoctorId: familyHead?.assignedDoctorId,
+          assignedDoctorName: "Testdoctor",
+          role: familyHead?.role,
+          image: familyHead?.image,
+          scans: userScans,
+        };
+
         console.log(familyHead, "i am head");
         res.json({
           serverError: 0,
           message: "you are login success fully",
           data: {
-            familyHeadId: familyHead?.userId,
+            familyHead: familyHead,
             fileId: existingUser._id,
             role: existingUser.role,
             access_token: access_token,
@@ -1146,12 +1167,31 @@ const login = async (req, res, next) => {
         let familyHead = existingUser?.familyMembers?.find(
           (member) => member.uniqueId === existingUser.uniqueId
         );
+        familyHead = await User.findOne({ _id: familyHead?.userId });
+        let userScans = await Scans.find({ userId: familyHead._id }).limit(5);
+        console.log(userScans, "i am scans");
+        familyHead = {
+          _id: familyHead?._id,
+          firstName: familyHead?.firstName,
+          lastName: familyHead?._lastName,
+          emiratesId: familyHead?._uniqueId2,
+          fileNumber: familyHead?._uniqueId1,
+          phoneNumber: familyHead?.phoneNumber,
+          email: familyHead?.email,
+          gender: familyHead?.gender,
+          city: familyHead?.city,
+          assignedDoctorId: familyHead?.assignedDoctorId,
+          assignedDoctorName: "Testdoctor",
+          role: familyHead?.role,
+          image: familyHead?.image,
+          scans: userScans,
+        };
         console.log(familyHead, "i am head");
         res.json({
           serverError: 0,
           message: "you are login success fully",
           data: {
-            familyHeadId: familyHead?.userId,
+            familyHead: familyHead,
             fileId: existingUser._id,
             role: existingUser.role,
             access_token: access_token,
@@ -1666,10 +1706,7 @@ const contact = async (req, res) => {
   savedContact.save((err) => {
     if (err) {
       console.log(err);
-      // res.json({
-      //   success: false,
-      //   message: "Somthing went wrong while saving the contact info",
-      // });
+
       res.json({
         serverError: 1,
 
@@ -1680,11 +1717,6 @@ const contact = async (req, res) => {
       });
       return;
     } else {
-      // res.json({
-      //   success: true,
-      //   message:
-      //     "We have received your message and will respond within 24-48 Hrs",
-      // });
       res.json({
         serverError: 0,
 

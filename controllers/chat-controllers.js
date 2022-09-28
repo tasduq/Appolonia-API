@@ -12,12 +12,13 @@ const newChat = async (req, res) => {
       members: { $in: [senderId] },
     });
 
-    // let foundConversation = conversations.map((convo) =>
-    //   convo.members.some((member) => member === receiverId)
-    // );
-    let foundConversation;
-    for (convo of conversations) {
-      foundConversation = convo.members.some((member) => member === receiverId);
+    let foundConversation = false;
+    let i = 0;
+    while (i < conversations?.length && foundConversation === false) {
+      foundConversation = conversations[i].members.some(
+        (member) => member === receiverId
+      );
+      i++;
     }
 
     console.log(foundConversation, "Found conversations");

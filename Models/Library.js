@@ -6,7 +6,7 @@ const librarySchema = new Schema({
   name: { type: String },
   description: { type: String },
   image: { type: String },
-  createdBy: { type: Object },
+  author: { type: Object },
   created: {
     type: Date,
     default: Date.now,

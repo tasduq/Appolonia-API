@@ -28,6 +28,8 @@ const userSchema = new Schema({
   },
   uniqueId1: { type: String }, //fil
   uniqueId2: { type: String }, //emi
+  assignedDoctorId: { type: String },
+  // assignedDoctorName: { type: String },
 });
 
 // userSchema.plugin(uniqueValidator);
