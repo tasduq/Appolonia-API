@@ -1604,7 +1604,7 @@ const requestForgotOtp = async (req, res) => {
         });
       return;
     } else {
-      sendPhoneOtp(phoneNumber, otp);
+      // sendPhoneOtp(phoneNumber, otp);
       // res.json({
       //   success: true,
       //   message: "OTP Sent to Phone Number",
