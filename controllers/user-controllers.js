@@ -1564,6 +1564,7 @@ const requestForgotOtp = async (req, res) => {
     upperCaseAlphabets: false,
     specialChars: false,
   });
+  console.log(otp, "i am otp");
 
   let foundForgotPhone = await Forgotphoneverified.findOne({
     fileId: phoneExist._id,
