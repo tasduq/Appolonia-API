@@ -613,8 +613,7 @@ const signup = async (req, res, next) => {
                       } else {
                         res.json({
                           serverError: 0,
-                          message:
-                            "Registration Successful. You would be notified from the clinic soon",
+                          message: "Otp sent to you phone number",
                           data: {
                             fileId: latestFile._id,
                             success: 1,
@@ -1232,6 +1231,7 @@ const login = async (req, res, next) => {
             access_token: access_token,
             // familyMembers,
             success: 1,
+            phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
           },
         });
         return;
@@ -1472,8 +1472,8 @@ const changePassword = async (req, res) => {
 
 const requestNewOtp = async (req, res) => {
   console.log(req.body);
-  const { phoneNumber } = req.body;
-  let phoneExist = await File.findOne({ phoneNumber: phoneNumber }, "_id");
+  const { fileId } = req.body;
+  let phoneExist = await File.findOne({ _id: fileId }, "phoneNumber");
   if (!phoneExist) {
     res.json({
       serverError: 0,
@@ -1485,18 +1485,15 @@ const requestNewOtp = async (req, res) => {
     return;
   }
   let otp = otpGenerator.generate(4, {
-    // upperCase: false,
-    // specialChars: false,
-    // alphabets: false,
     lowerCaseAlphabets: false,
     upperCaseAlphabets: false,
     specialChars: false,
   });
   let foundForgotPhone = await Filephoneverified.findOne({
-    fileId: phoneExist._id,
+    fileId: fileId,
   });
   if (foundForgotPhone) {
-    Filephoneverified.deleteOne({ fileId: phoneExist._id }, async (err) => {
+    Filephoneverified.deleteOne({ fileId: fileId }, async (err) => {
       if (err) {
         throw new Error("Error deleting the OTP Session");
       } else {
@@ -1507,7 +1504,7 @@ const requestNewOtp = async (req, res) => {
   console.log(phoneExist);
   let createdForgotOtp = await Filephoneverified({
     otp: otp,
-    fileId: phoneExist._id,
+    fileId: fileId,
     created: Date.now(),
     expires: Date.now() + 600000,
   });
@@ -1516,7 +1513,6 @@ const requestNewOtp = async (req, res) => {
       console.log(err),
         res.json({
           serverError: 1,
-
           message: "Somthing went wrong",
           data: {
             success: 0,
@@ -1524,14 +1520,12 @@ const requestNewOtp = async (req, res) => {
         });
       return;
     } else {
-      sendPhoneOtp(phoneNumber, otp);
-
+      sendPhoneOtp(phoneExist?.phoneNumber, otp);
       res.json({
         serverError: 0,
-
         message: "OTP Sent to Phone Number",
         data: {
-          fileId: phoneExist._id,
+          fileId: fileId,
           success: 1,
         },
       });
