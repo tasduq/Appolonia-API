@@ -170,6 +170,42 @@ const updateUserProfile = async (req, res) => {
                 console.log(err);
                 throw new Error("Error updating the user");
               } else {
+                File.updateOne(
+                  { _id: fileId, "familyMembers.userId": userId },
+                  {
+                    $set: {
+                      "familyMembers.$.memberEmiratesId": hashedemiratesId,
+                      "familyMembers.$.uniqueId": emiratesId,
+                    },
+                  },
+                  (err) => {
+                    if (err) {
+                      throw new Error("Error updating the user");
+                    } else {
+                      res.json({
+                        serverError: 0,
+                        message: "User data updated",
+                        data: { success: 1 },
+                      });
+                    }
+                  }
+                );
+              }
+            }
+          );
+        } else {
+          File.updateOne(
+            { _id: fileId, "familyMembers.userId": userId },
+            {
+              $set: {
+                "familyMembers.$.memberEmiratesId": hashedemiratesId,
+                "familyMembers.$.uniqueId": emiratesId,
+              },
+            },
+            (err) => {
+              if (err) {
+                throw new Error("Error updating the user");
+              } else {
                 res.json({
                   serverError: 0,
                   message: "User data updated",
@@ -178,12 +214,6 @@ const updateUserProfile = async (req, res) => {
               }
             }
           );
-        } else {
-          res.json({
-            serverError: 0,
-            message: "User data updated",
-            data: { success: 1 },
-          });
         }
       }
     });
@@ -1002,6 +1032,7 @@ const login = async (req, res, next) => {
         let familyHead = existingUser?.familyMembers?.find(
           (member) => member.uniqueId === existingUser.uniqueId
         );
+        console.log("i am head", familyHead);
 
         familyHead = await User.findOne({ _id: familyHead?.userId });
         let userScans = await Scans.find({ userId: familyHead._id }).limit(5);
