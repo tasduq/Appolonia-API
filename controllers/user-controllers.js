@@ -1009,17 +1009,19 @@ const login = async (req, res, next) => {
         familyHead = {
           _id: familyHead?._id,
           firstName: familyHead?.firstName,
-          lastName: familyHead?._lastName,
-          emiratesId: familyHead?._uniqueId2,
-          fileNumber: familyHead?._uniqueId1,
+          lastName: familyHead?.lastName,
+          emiratesId: familyHead?.uniqueId2,
+          fileNumber: familyHead?.uniqueId1,
           phoneNumber: familyHead?.phoneNumber,
           email: familyHead?.email,
           gender: familyHead?.gender,
           city: familyHead?.city,
-          assignedDoctorId: familyHead?.assignedDoctorId,
+          assignedDoctorId: familyHead?.assignedDoctorId
+            ? familyHead?.assignedDoctorId
+            : "",
           assignedDoctorName: "Testdoctor",
           role: familyHead?.role,
-          image: familyHead?.image,
+          image: familyHead?.image ? familyHead?.image : "",
           scans: userScans,
         };
 
@@ -1173,17 +1175,19 @@ const login = async (req, res, next) => {
         familyHead = {
           _id: familyHead?._id,
           firstName: familyHead?.firstName,
-          lastName: familyHead?._lastName,
-          emiratesId: familyHead?._uniqueId2,
-          fileNumber: familyHead?._uniqueId1,
+          lastName: familyHead?.lastName,
+          emiratesId: familyHead?.uniqueId2,
+          fileNumber: familyHead?.uniqueId1,
           phoneNumber: familyHead?.phoneNumber,
           email: familyHead?.email,
           gender: familyHead?.gender,
           city: familyHead?.city,
-          assignedDoctorId: familyHead?.assignedDoctorId,
+          assignedDoctorId: familyHead?.assignedDoctorId
+            ? familyHead?.assignedDoctorId
+            : "",
           assignedDoctorName: "Testdoctor",
           role: familyHead?.role,
-          image: familyHead?.image,
+          image: familyHead?.image ? familyHead?.image : "",
           scans: userScans,
         };
         console.log(familyHead, "i am head");
