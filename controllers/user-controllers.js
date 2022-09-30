@@ -543,6 +543,7 @@ const checkPatient = async (req, res) => {
             message:
               "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
             data: {
+              fileId: fileExist._id,
               success: 0,
               clinicVerified: 0,
               isExisting: 1,
@@ -594,6 +595,7 @@ const checkPatient = async (req, res) => {
             message:
               " We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
             data: {
+              fileId: fileExist._id,
               success: 0,
               clinicVerified: 1,
               isExisting: 1,
