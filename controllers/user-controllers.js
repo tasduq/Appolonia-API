@@ -963,6 +963,7 @@ const login = async (req, res, next) => {
             data: {
               success: 0,
               phoneVerified: 0,
+              fileId: existingUser?._id,
             },
           });
           return;
@@ -1138,6 +1139,7 @@ const login = async (req, res, next) => {
             data: {
               success: 0,
               phoneVerified: 0,
+              fileId: existingUser?._id,
             },
           });
           return;
