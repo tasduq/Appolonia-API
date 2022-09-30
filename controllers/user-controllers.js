@@ -318,6 +318,7 @@ const checkPatient = async (req, res) => {
                 "We have sent the OTP to the number associated to that account",
               data: {
                 fileId: fileExist._id,
+                otp: otp,
                 success: 1,
               },
             });
@@ -398,6 +399,7 @@ const checkPatient = async (req, res) => {
                 "We have sent the OTP to the number associated to that account",
               data: {
                 fileId: fileExist._id,
+                otp: otp,
                 success: 1,
               },
             });
@@ -960,6 +962,7 @@ const login = async (req, res, next) => {
             message: "You have not verified your phone number",
             data: {
               success: 0,
+              phoneVerified: 0,
             },
           });
           return;
