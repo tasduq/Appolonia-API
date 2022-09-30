@@ -19,6 +19,7 @@ const Forgotphoneverified = require("../Models/Forgotphonrverification");
 const Conversation = require("../Models/Conversations");
 const Message = require("../Models/Messages");
 const Scans = require("../Models/Scans");
+const Settings = require("../Models/Settings");
 
 // const accountSid = "AC05d6ccacda0201d3e850b4ce60c773af";
 // const authToken = "5f7f59ab3a6bdf8fcc2d810e6be45f98";
@@ -246,9 +247,11 @@ const checkPatient = async (req, res) => {
     if (isFileNumber === "1") {
       let user = await User.findOne({ uniqueId1: fileNumber });
       if (!user) {
+        let clinic = await Settings.find({}, "clinicName");
+        console.log(clinic[0], "i am clinic");
         res.json({
           serverError: 0,
-          message: "You are not a registered Patient",
+          message: `Welcome to ${clinic[0]?.clinicName} . We would like to have some details to activate your account.`,
           data: {
             success: 0,
           },
@@ -258,14 +261,12 @@ const checkPatient = async (req, res) => {
 
       let fileExist = await File.findOne({
         phoneNumber: user.phoneNumber,
-        clinicVerified: true,
       });
       if (!fileExist) {
         // throw new Error("No account is registered with that File Number");
         res.json({
           serverError: 0,
-          message:
-            "No account is registered with that File Number or your account is not clinic verified",
+          message: "No account is registered with that File Number",
           data: {
             success: 0,
           },
@@ -275,7 +276,6 @@ const checkPatient = async (req, res) => {
         if (fileExist.active === true) {
           res.json({
             serverError: 0,
-
             message: "This account is already active. Try logging in",
             data: {
               success: 0,
@@ -1491,6 +1491,7 @@ const requestNewOtp = async (req, res) => {
     upperCaseAlphabets: false,
     specialChars: false,
   });
+  console.log(otp, "i am otp");
   let foundForgotPhone = await Filephoneverified.findOne({
     fileId: fileId,
   });
@@ -1510,6 +1511,7 @@ const requestNewOtp = async (req, res) => {
     created: Date.now(),
     expires: Date.now() + 600000,
   });
+
   createdForgotOtp.save((err) => {
     if (err) {
       console.log(err),
@@ -1522,7 +1524,7 @@ const requestNewOtp = async (req, res) => {
         });
       return;
     } else {
-      sendPhoneOtp(phoneExist?.phoneNumber, otp);
+      // sendPhoneOtp(phoneExist?.phoneNumber, otp);
       res.json({
         serverError: 0,
         message: "OTP Sent to Phone Number",
