@@ -792,7 +792,7 @@ const emailVerify = async (req, res) => {
     if (user) {
       if (user.otp === otp) {
         File.updateOne(
-          { fileId: fileId },
+          { _id: fileId },
           { $set: { phoneVerified: true } },
           function (err) {
             if (err) {
@@ -927,10 +927,8 @@ const login = async (req, res, next) => {
         return;
       } else {
         if (existingUser.clinicVerified === false) {
-          // throw new Error("Your account has not verified from the clinic yet");
           res.json({
             serverError: 0,
-
             message: "Your account has not verified from the clinic yet",
             data: {
               success: 0,
@@ -939,31 +937,72 @@ const login = async (req, res, next) => {
           return;
         }
 
-        if (existingUser.active === false) {
-          // throw new Error(
-          //   "Your account has not been activated from the clinic yet"
-          // );
-          res.json({
-            serverError: 0,
-
-            message: "Your account has not been activated from the clinic yet",
-            data: {
-              success: 0,
-            },
+        if (existingUser.phoneVerified === false) {
+          let otp = otpGenerator.generate(4, {
+            lowerCaseAlphabets: false,
+            upperCaseAlphabets: false,
+            specialChars: false,
           });
+          console.log(otp, "i am otp");
+          let foundForgotPhone = await Filephoneverified.findOne({
+            fileId: existingUser?._id,
+          });
+          if (foundForgotPhone) {
+            Filephoneverified.deleteOne(
+              { fileId: existingUser?._id },
+              async (err) => {
+                if (err) {
+                  throw new Error("Error deleting the OTP Session");
+                } else {
+                  console.log("deleted previous");
+                }
+              }
+            );
+          }
+          // console.log(phoneExist);
+          let createdForgotOtp = await Filephoneverified({
+            otp: otp,
+            fileId: existingUser?._id,
+            created: Date.now(),
+            expires: Date.now() + 600000,
+          });
+
+          createdForgotOtp.save((err) => {
+            if (err) {
+              console.log(err),
+                res.json({
+                  serverError: 1,
+                  message: "Somthing went wrong",
+                  data: {
+                    success: 0,
+                  },
+                });
+              return;
+            } else {
+              // sendPhoneOtp(phoneExist?.phoneNumber, otp);
+              res.json({
+                serverError: 0,
+                message: "OTP Sent to Phone Number",
+                data: {
+                  fileId: existingUser?._id,
+                  otp: otp,
+                  phoneVerified: 0,
+                  success: 1,
+                },
+              });
+              return;
+            }
+          });
+
           return;
         }
 
-        if (existingUser.phoneVerified === false) {
-          // throw new Error("You have not verified your phone number");
+        if (existingUser.active === false) {
           res.json({
             serverError: 0,
-
-            message: "You have not verified your phone number",
+            message: "Your account has not been activated from the clinic yet",
             data: {
               success: 0,
-              phoneVerified: 0,
-              fileId: existingUser?._id,
             },
           });
           return;
@@ -1119,27 +1158,74 @@ const login = async (req, res, next) => {
           return;
         }
 
+        if (existingUser.phoneVerified === false) {
+          let otp = otpGenerator.generate(4, {
+            lowerCaseAlphabets: false,
+            upperCaseAlphabets: false,
+            specialChars: false,
+          });
+          console.log(otp, "i am otp");
+          let foundForgotPhone = await Filephoneverified.findOne({
+            fileId: existingUser?._id,
+          });
+          if (foundForgotPhone) {
+            Filephoneverified.deleteOne(
+              { fileId: existingUser?._id },
+              async (err) => {
+                if (err) {
+                  throw new Error("Error deleting the OTP Session");
+                } else {
+                  console.log("deleted previous");
+                }
+              }
+            );
+          }
+          // console.log(phoneExist);
+          let createdForgotOtp = await Filephoneverified({
+            otp: otp,
+            fileId: existingUser?._id,
+            created: Date.now(),
+            expires: Date.now() + 600000,
+          });
+
+          createdForgotOtp.save((err) => {
+            if (err) {
+              console.log(err),
+                res.json({
+                  serverError: 1,
+                  message: "Somthing went wrong",
+                  data: {
+                    success: 0,
+                  },
+                });
+              return;
+            } else {
+              // sendPhoneOtp(phoneExist?.phoneNumber, otp);
+              res.json({
+                serverError: 0,
+                message: "OTP Sent to Phone Number",
+                data: {
+                  fileId: existingUser?._id,
+                  otp: otp,
+                  phoneVerified: 0,
+                  success: 1,
+                },
+              });
+              return;
+            }
+          });
+
+          return;
+        }
+
         if (existingUser.active === false) {
+          console.log("i am thereeeeeeeeee");
           res.json({
             serverError: 0,
 
             message: "Your account has not been activated from the clinic yet",
             data: {
               success: 0,
-            },
-          });
-          return;
-        }
-
-        if (existingUser.phoneVerified === false) {
-          // throw new Error("You have not verified your phone number");
-          res.json({
-            serverError: 0,
-            message: "You have not verified your phone number",
-            data: {
-              success: 0,
-              phoneVerified: 0,
-              fileId: existingUser?._id,
             },
           });
           return;
@@ -1256,6 +1342,106 @@ const login = async (req, res, next) => {
       });
       return;
     }
+  }
+};
+
+const sendOtpIfPhoneNotVerified = async (fileId) => {
+  try {
+    let phoneExist = await File.findOne({ _id: fileId }, "phoneNumber");
+    if (!phoneExist) {
+      return {
+        serverError: 0,
+        message: "Phonenumber is not registered with us",
+        data: {
+          success: 0,
+        },
+      };
+      // res.json({
+      //   serverError: 0,
+      //   message: "Phonenumber is not registered with us",
+      //   data: {
+      //     success: 0,
+      //   },
+      // });
+      // return;
+    }
+    let otp = otpGenerator.generate(4, {
+      lowerCaseAlphabets: false,
+      upperCaseAlphabets: false,
+      specialChars: false,
+    });
+    console.log(otp, "i am otp");
+    let foundForgotPhone = await Filephoneverified.findOne({
+      fileId: fileId,
+    });
+    if (foundForgotPhone) {
+      Filephoneverified.deleteOne({ fileId: fileId }, async (err) => {
+        if (err) {
+          throw new Error("Error deleting the OTP Session");
+        } else {
+          console.log("deleted previous");
+        }
+      });
+    }
+    console.log(phoneExist);
+    let createdForgotOtp = await Filephoneverified({
+      otp: otp,
+      fileId: fileId,
+      created: Date.now(),
+      expires: Date.now() + 600000,
+    });
+
+    createdForgotOtp.save((err) => {
+      if (err) {
+        return {
+          serverError: 1,
+          message: "Somthing went wrong",
+          data: {
+            success: 0,
+          },
+        };
+        // console.log(err),
+        //   res.json({
+        //     serverError: 1,
+        //     message: "Somthing went wrong",
+        //     data: {
+        //       success: 0,
+        //     },
+        //   });
+        // return;
+      } else {
+        // sendPhoneOtp(phoneExist?.phoneNumber, otp);
+        return {
+          serverError: 0,
+          message: "You have not verified your phone number",
+          data: {
+            success: 0,
+            phoneVerified: 0,
+            fileId: fileId,
+            otp: otp,
+          },
+        };
+        // res.json({
+        //   serverError: 0,
+        //   message: "You have not verified your phone number",
+        //   data: {
+        //     success: 0,
+        //     phoneVerified: 0,
+        //     fileId: fileId,
+        //     otp: otp,
+        //   },
+        // });
+        // return;
+      }
+    });
+  } catch (err) {
+    return {
+      serverError: 1,
+      message: err.message,
+      data: {
+        success: 0,
+      },
+    };
   }
 };
 
