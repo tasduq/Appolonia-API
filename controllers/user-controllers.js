@@ -238,6 +238,7 @@ const checkPatient = async (req, res) => {
     upperCaseAlphabets: false,
     specialChars: false,
   });
+  console.log(otp, "i am otp");
   if (!otp) {
     throw new Error("Error Genrating OTP");
   }
@@ -516,6 +517,7 @@ const signup = async (req, res, next) => {
         upperCaseAlphabets: false,
         specialChars: false,
       });
+      console.log(otp, "i am otp");
       if (!otp) {
         throw new Error("Error Genrating OTP");
       }
