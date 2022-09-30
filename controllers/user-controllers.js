@@ -254,6 +254,10 @@ const checkPatient = async (req, res) => {
           message: `Welcome to ${clinic[0]?.clinicName} . We would like to have some details to activate your account.`,
           data: {
             success: 0,
+            isExisting: 0,
+            clinicVerified: 0,
+            active: 0,
+            activeRequested: 0,
           },
         });
         return;
@@ -266,23 +270,65 @@ const checkPatient = async (req, res) => {
         // throw new Error("No account is registered with that File Number");
         res.json({
           serverError: 0,
-          message: "No account is registered with that File Number",
+          message:
+            "No account is registered with that File Number or your phone number is no longer associated to that family account",
           data: {
             success: 0,
+            isExisting: 0,
+            clinicVerified: 0,
+            active: 0,
+            activeRequested: 0,
           },
         });
         return;
       } else {
+        if (fileExist.clinicVerified === false) {
+          res.json({
+            serverError: 0,
+            message:
+              "Your account is still not verified by the Clinic. We are reviewing it and will get back to you soon",
+            data: {
+              success: 0,
+              clinicVerified: 0,
+              isExisting: 1,
+              active: 0,
+              activeRequested: 0,
+            },
+          });
+          return;
+        }
+
         if (fileExist.active === true) {
           res.json({
             serverError: 0,
             message: "This account is already active. Try logging in",
             data: {
               success: 0,
+              isExisting: 1,
+              active: 1,
+              clinicVerified: 1,
+              activeRequested: 1,
             },
           });
           return;
         }
+
+        if (fileExist.activeRequested === true) {
+          res.json({
+            serverError: 0,
+            message:
+              "You have already requested for the activation of the account",
+            data: {
+              success: 0,
+              isExisting: 1,
+              activeRequested: 1,
+              clinicVerified: 1,
+              active: 0,
+            },
+          });
+          return;
+        }
+
         let foundForgotPhone = await Filephoneverified.findOne({
           fileId: fileExist._id,
         });
@@ -315,7 +361,7 @@ const checkPatient = async (req, res) => {
               serverError: 0,
 
               message:
-                "We have sent the OTP to the number associated to that account",
+                "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
               data: {
                 fileId: fileExist._id,
                 otp: otp,
@@ -329,42 +375,88 @@ const checkPatient = async (req, res) => {
     } else {
       let user = await User.findOne({ uniqueId2: emiratesId });
       if (!user) {
+        let clinic = await Settings.find({}, "clinicName");
+        console.log(clinic[0], "i am clinic");
         res.json({
           serverError: 0,
-          message: "You are not a registered Patient",
+          message: `Welcome to ${clinic[0]?.clinicName} . We would like to have some details to activate your account.`,
           data: {
             success: 0,
+            isExisting: 0,
+            clinicVerified: 0,
+            active: 0,
+            activeRequested: 0,
           },
         });
         return;
       }
       let fileExist = await File.findOne({
         phoneNumber: user.phoneNumber,
-        clinicVerified: true,
       });
       console.log(fileExist, "fileexist");
       if (!fileExist) {
         // throw new Error("No account is registered with that Emirates Id");
         res.json({
           serverError: 0,
-          message: "No account is registered with that Emirates Id",
+          message:
+            "No account is registered with that File Number or your phone number is no longer associated to that family account",
           data: {
             success: 0,
+            isExisting: 0,
+            clinicVerified: 0,
+            active: 0,
+            activeRequested: 0,
           },
         });
         return;
       } else {
-        if (fileExist.active === true) {
+        if (fileExist.clinicVerified === false) {
           res.json({
             serverError: 0,
-
-            message: "This account is already active. Try logging in",
+            message:
+              "Your account is still not verified by the Clinic. We are reviewing it and will get back to you soon",
             data: {
               success: 0,
+              clinicVerified: 0,
+              isExisting: 1,
+              active: 0,
+              activeRequested: 0,
             },
           });
           return;
         }
+
+        if (fileExist.active === true) {
+          res.json({
+            serverError: 0,
+            message: "This account is already active. Try logging in",
+            data: {
+              success: 0,
+              isExisting: 1,
+              active: 1,
+              clinicVerified: 1,
+              activeRequested: 1,
+            },
+          });
+          return;
+        }
+
+        if (fileExist.activeRequested === true) {
+          res.json({
+            serverError: 0,
+            message:
+              "You have already requested for the activation of the account",
+            data: {
+              success: 0,
+              isExisting: 1,
+              activeRequested: 1,
+              clinicVerified: 1,
+              active: 0,
+            },
+          });
+          return;
+        }
+
         let foundForgotPhone = await Filephoneverified.findOne({
           fileId: fileExist._id,
         });
@@ -396,7 +488,7 @@ const checkPatient = async (req, res) => {
             res.json({
               serverError: 0,
               message:
-                "We have sent the OTP to the number associated to that account",
+                "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
               data: {
                 fileId: fileExist._id,
                 otp: otp,
