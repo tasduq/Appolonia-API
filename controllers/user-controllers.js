@@ -1137,6 +1137,7 @@ const login = async (req, res, next) => {
             message: "You have not verified your phone number",
             data: {
               success: 0,
+              phoneVerified: 0,
             },
           });
           return;
