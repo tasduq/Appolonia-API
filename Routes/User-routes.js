@@ -28,4 +28,6 @@ router.post("/changepassword", usersController.changePassword);
 router.post("/updateprofile", usersController.updateUserProfile);
 router.post("/deleteaccount", usersController.deleteAccount);
 
+router.get("/getalldoctors", usersController.getAllDoctors);
+
 module.exports = router;

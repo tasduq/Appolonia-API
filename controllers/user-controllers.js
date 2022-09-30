@@ -298,7 +298,7 @@ const checkPatient = async (req, res) => {
             }
           );
         }
-        sendPhoneOtp(fileExist.phoneNumber, otp);
+        // sendPhoneOtp(fileExist.phoneNumber, otp);
         // sendEmailOtp(email, otp);'
 
         const createdFilephoneverification = new Filephoneverified({
@@ -379,7 +379,7 @@ const checkPatient = async (req, res) => {
             }
           );
         }
-        sendPhoneOtp(fileExist.phoneNumber, otp);
+        // sendPhoneOtp(fileExist.phoneNumber, otp);
         // sendEmailOtp(email, otp);
 
         const createdFilephoneverification = new Filephoneverified({
@@ -583,8 +583,8 @@ const signup = async (req, res, next) => {
                 );
               }
 
-              sendPhoneOtp(phoneNumber, otp);
-              sendEmailOtp(email, otp);
+              // sendPhoneOtp(phoneNumber, otp);
+              // sendEmailOtp(email, otp);
 
               const createdFilephoneverification = new Filephoneverified({
                 otp: otp,
@@ -1837,6 +1837,50 @@ const deleteAccount = async (req, res) => {
   }
 };
 
+const getAllDoctors = (req, res) => {
+  const doctors = [
+    {
+      _id: "1",
+      doctorName: "Tasadduq",
+      departmentNumber: "123",
+      role: "admin",
+    },
+    {
+      _id: "2",
+      doctorName: "Tasadduq Ali",
+      departmentNumber: "1234",
+      role: "doctor",
+    },
+    {
+      _id: "3",
+      doctorName: "Tasadduq Ali Khokhar",
+      departmentNumber: "12345",
+      role: "doctor",
+    },
+    {
+      _id: "4",
+      doctorName: "Sanju",
+      departmentNumber: "123456",
+      role: "doctor",
+    },
+    {
+      _id: "5",
+      doctorName: "Sanju Doctor",
+      departmentNumber: "1234567",
+      role: "doctor",
+    },
+  ];
+
+  res.json({
+    serverError: 0,
+    message: "Doctors Found",
+    data: {
+      doctors: doctors,
+      success: 1,
+    },
+  });
+};
+
 module.exports = {
   signup,
   login,
@@ -1854,4 +1898,5 @@ module.exports = {
   logout,
   updateUserProfile,
   deleteAccount,
+  getAllDoctors,
 };
