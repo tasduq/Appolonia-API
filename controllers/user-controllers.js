@@ -258,6 +258,7 @@ const checkPatient = async (req, res) => {
             clinicVerified: 0,
             active: 0,
             activeRequested: 0,
+            phoneVerified: 0,
           },
         });
         return;
@@ -278,6 +279,7 @@ const checkPatient = async (req, res) => {
             clinicVerified: 0,
             active: 0,
             activeRequested: 0,
+            phoneVerified: 0,
           },
         });
         return;
@@ -293,6 +295,7 @@ const checkPatient = async (req, res) => {
               isExisting: 1,
               active: 0,
               activeRequested: 0,
+              phoneVerified: fileExist?.phoneVerified === true ? 1 : 0,
             },
           });
           return;
@@ -308,6 +311,7 @@ const checkPatient = async (req, res) => {
               active: 1,
               clinicVerified: 1,
               activeRequested: 1,
+              phoneVerified: 1,
             },
           });
           return;
@@ -324,10 +328,28 @@ const checkPatient = async (req, res) => {
               activeRequested: 1,
               clinicVerified: 1,
               active: 0,
+              phoneVerified: 1,
             },
           });
           return;
         }
+
+        // if (fileExist.clinicVerified === true) {
+        //   res.json({
+        //     serverError: 0,
+        //     message:
+        //       "Your account is still not verified by the Clinic. We are reviewing it and will get back to you soon",
+        //     data: {
+        //       success: 0,
+        //       clinicVerified: 1,
+        //       isExisting: 1,
+        //       active: 0,
+        //       activeRequested: 0,
+        //       phoneVerified: fileExist?.phoneVerified === true ? 1 : 0,
+        //     },
+        //   });
+        //   return;
+        // }
 
         let foundForgotPhone = await Filephoneverified.findOne({
           fileId: fileExist._id,
@@ -386,6 +408,7 @@ const checkPatient = async (req, res) => {
             clinicVerified: 0,
             active: 0,
             activeRequested: 0,
+            phoneVerified: 0,
           },
         });
         return;
@@ -406,6 +429,7 @@ const checkPatient = async (req, res) => {
             clinicVerified: 0,
             active: 0,
             activeRequested: 0,
+            phoneVerified: 0,
           },
         });
         return;
@@ -421,6 +445,7 @@ const checkPatient = async (req, res) => {
               isExisting: 1,
               active: 0,
               activeRequested: 0,
+              phoneVerified: fileExist?.phoneVerified === true ? 1 : 0,
             },
           });
           return;
@@ -436,6 +461,7 @@ const checkPatient = async (req, res) => {
               active: 1,
               clinicVerified: 1,
               activeRequested: 1,
+              phoneVerified: 1,
             },
           });
           return;
@@ -452,6 +478,7 @@ const checkPatient = async (req, res) => {
               activeRequested: 1,
               clinicVerified: 1,
               active: 0,
+              phoneVerified: 1,
             },
           });
           return;
@@ -555,7 +582,7 @@ const signup = async (req, res, next) => {
         // throw new Error("User Already Exist");
         res.json({
           serverError: 0,
-          message: "User Already Exist",
+          message: "This Emirates id already exist",
           data: {
             success: 0,
           },
@@ -568,7 +595,6 @@ const signup = async (req, res, next) => {
         // throw new Error("User Phone Already Exist");
         res.json({
           serverError: 0,
-
           message: "This phone is already registered to a family account. ",
           data: {
             success: 0,
@@ -709,7 +735,8 @@ const signup = async (req, res, next) => {
                       } else {
                         res.json({
                           serverError: 0,
-                          message: "Otp sent to you phone number",
+                          message:
+                            "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
                           data: {
                             fileId: latestFile._id,
                             success: 1,
@@ -777,7 +804,7 @@ const signup = async (req, res, next) => {
               res.json({
                 serverError: 0,
                 message:
-                  "Thanks for registering with us, our team will review your details and contact you soon to activate your account",
+                  "Thanks for verifying your Mobile Number. Our Team will be in touch soon to activate your account.",
                 data: {
                   success: 1,
                 },
