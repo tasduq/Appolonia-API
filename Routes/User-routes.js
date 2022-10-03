@@ -2,7 +2,24 @@ const express = require("express");
 
 const usersController = require("../controllers/user-controllers");
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+cloudinary.config({
+  cloud_name: "dbff6tzuo",
+  api_key: "376437619835514",
+  api_secret: "Jz-U91pJTdFnbWN4X6Lx3fj6pC4",
+});
+
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "CONTACT",
+  },
+});
+
+const upload = multer({ storage: storage });
+// const upload = multer({ dest: "uploads/" });
 
 const router = express.Router();
 

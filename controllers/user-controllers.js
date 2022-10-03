@@ -7,6 +7,23 @@ const Cryptr = require("cryptr");
 const cryptr = new Cryptr("myTotallySecretKey");
 const { encrypt, decrypt, randomKey } = require("lab46-encrypt");
 const { JWTKEY, SMTPPASS, accountSid, authToken } = require("../Config/config");
+// const cloudinary = require("cloudinary").v2;
+// const { CloudinaryStorage } = require("multer-storage-cloudinary");
+
+// cloudinary.config({
+//   cloud_name: "dbff6tzuo",
+//   api_key: "376437619835514",
+//   api_secret: "Jz-U91pJTdFnbWN4X6Lx3fj6pC4",
+// });
+
+// const storage = new CloudinaryStorage({
+//   cloudinary: cloudinary,
+//   params: {
+//     folder: "DEV",
+//   },
+// });
+
+// const uploadFiles = multer({ storage: storage });
 
 var KEY = "qwertyuiopasdfghjklzxcvbnm123456";
 
@@ -2186,24 +2203,13 @@ const verifyForgotOtp = async (req, res) => {
 };
 
 const contact = async (req, res) => {
+  // console.log(req.files);
   console.log(req.files);
-  // if (req.files.length === 0) {
-  //   // res.json({ success: false, message: "Files not selecteds" });
-  //   // return;
-  //   res.json({
-  //     serverError: 0,
 
-  //     message: "Files not selected",
-  //     data: {
-  //       success: 0,
-  //     },
-  //   });
-  //   return;
-  // }
   let filesName = [];
   if (req?.files?.length > 0) {
     console.log(req.files, "here are the files");
-    filesName = req.files.map((file) => file.filename);
+    filesName = req.files.map((file) => file.path);
   }
 
   console.log(req.body.name);
