@@ -719,7 +719,6 @@ const signup = async (req, res, next) => {
             success: 0,
             phoneVerified: userPhoneExist?.phoneVerified === true ? 1 : 0,
             isExisting: 1,
-            success: 0,
           },
         });
         return;
@@ -739,9 +738,6 @@ const signup = async (req, res, next) => {
       }
 
       let otp = otpGenerator.generate(4, {
-        // upperCase: false,
-        // specialChars: false,
-        // alphabets: false,
         lowerCaseAlphabets: false,
         upperCaseAlphabets: false,
         specialChars: false,
@@ -873,6 +869,8 @@ const signup = async (req, res, next) => {
         message: err.message,
         data: {
           success: 0,
+          phoneVerified: 0,
+          isExisting: 0,
         },
       });
     }
@@ -889,6 +887,8 @@ const signup = async (req, res, next) => {
           message: "No account is registered with that File id",
           data: {
             success: 0,
+            phoneVerified: 0,
+            isExisting: 0,
           },
         });
         return;
@@ -900,6 +900,8 @@ const signup = async (req, res, next) => {
             message: "This account is already active. Try logging in",
             data: {
               success: 0,
+              phoneVerified: fileExist.phoneVerified === true ? 1 : 0,
+              isExisting: 1,
             },
           });
           return;
@@ -919,6 +921,8 @@ const signup = async (req, res, next) => {
                   "Thanks for verifying your Mobile Number. Our Team will be in touch soon to activate your account.",
                 data: {
                   success: 1,
+                  phoneVerified: fileExist.phoneVerified === true ? 1 : 0,
+                  isExisting: 0,
                 },
               });
               return;
@@ -935,6 +939,8 @@ const signup = async (req, res, next) => {
         message: err.message,
         data: {
           success: 0,
+          phoneVerified: 0,
+          isExisting: 0,
         },
       });
       return;
@@ -1045,7 +1051,8 @@ const emailVerify = async (req, res) => {
 
                   res.json({
                     serverError: 0,
-                    message: "Phone Number verified",
+                    message:
+                      "Thanks for verifying your Mobile Number. Our Team will be in touch soon to activate your account.",
                     data: {
                       fileId: foundFile._id,
                       success: 1,
@@ -1061,7 +1068,7 @@ const emailVerify = async (req, res) => {
         // throw new Error("Otp is wrong");
         res.json({
           serverError: 0,
-          message: "Otp is wrong",
+          message: "You have entered an Incorrect OTP Code, please try again.",
           data: {
             success: 0,
           },
@@ -1076,7 +1083,6 @@ const emailVerify = async (req, res) => {
     // return res.json({ success: false, message: err.message });
     res.json({
       serverError: 1,
-
       message: err.message,
       data: {
         success: 0,
@@ -1150,24 +1156,17 @@ const login = async (req, res, next) => {
         // throw new Error("Account does not exist");
         res.json({
           serverError: 0,
-          message: "Account does not exist",
+          message: "We couldn't find record with this Emirates id",
           data: {
             success: 0,
+            phoneVerified: 0,
+            clinicVerified: 0,
+            active: 0,
+            activeRequested: 0,
           },
         });
         return;
       } else {
-        if (existingUser.clinicVerified === false) {
-          res.json({
-            serverError: 0,
-            message: "Your account has not verified from the clinic yet",
-            data: {
-              success: 0,
-            },
-          });
-          return;
-        }
-
         if (existingUser.phoneVerified === false) {
           let otp = otpGenerator.generate(4, {
             lowerCaseAlphabets: false,
@@ -1206,6 +1205,10 @@ const login = async (req, res, next) => {
                   message: "Somthing went wrong",
                   data: {
                     success: 0,
+                    phoneVerified: 0,
+                    clinicVerified: 0,
+                    active: 0,
+                    activeRequested: 0,
                   },
                 });
               return;
@@ -1213,12 +1216,17 @@ const login = async (req, res, next) => {
               // sendPhoneOtp(phoneExist?.phoneNumber, otp);
               res.json({
                 serverError: 0,
-                message: "OTP Sent to Phone Number",
+                message:
+                  "Please verify your Mobile Number to activate your account.",
                 data: {
                   fileId: existingUser?._id,
                   otp: otp,
+                  success: 0,
                   phoneVerified: 0,
-                  success: 1,
+                  clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+                  active: existingUser?.active === true ? 1 : 0,
+                  activeRequested:
+                    existingUser?.activeRequested === true ? 1 : 0,
                 },
               });
               return;
@@ -1227,17 +1235,53 @@ const login = async (req, res, next) => {
 
           return;
         }
-
-        if (existingUser.active === false) {
+        if (existingUser.clinicVerified === false) {
           res.json({
             serverError: 0,
-            message: "Your account has not been activated from the clinic yet",
+            message:
+              "We are still reviewing your details and will get back to you soon to activate account.",
             data: {
               success: 0,
+              phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+              clinicVerified: 0,
+              active: existingUser?.active === true ? 1 : 0,
+              activeRequested: existingUser?.activeRequested === true ? 1 : 0,
             },
           });
           return;
         }
+
+        if (existingUser.activeRequested === true) {
+          res.json({
+            serverError: 0,
+            message:
+              "We are still reviewing your details and will get back to you soon to activate account.",
+            data: {
+              success: 0,
+              phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+              clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+              active: existingUser?.active === true ? 1 : 0,
+              activeRequested: 0,
+            },
+          });
+          return;
+        }
+
+        // if (existingUser.active === false) {
+        //   res.json({
+        //     serverError: 0,
+        //     message:
+        //       "We are still reviewing your details and will get back to you soon to activate account.",
+        //     data: {
+        //       success: 0,
+        //       phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+        //       clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+        //       active: 0,
+        //       activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+        //     },
+        //   });
+        //   return;
+        // }
 
         let isValidPassword = false;
         try {
@@ -1258,6 +1302,10 @@ const login = async (req, res, next) => {
             message: "Wrong Password",
             data: {
               success: 0,
+              phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+              clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+              active: existingUser?.active === true ? 1 : 0,
+              activeRequested: existingUser?.activeRequested === true ? 1 : 0,
             },
           });
           return;
@@ -1342,6 +1390,10 @@ const login = async (req, res, next) => {
             access_token: access_token,
             // familyMembers,
             success: 1,
+            phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+            clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+            active: existingUser?.active === true ? 1 : 0,
+            activeRequested: existingUser?.activeRequested === true ? 1 : 0,
           },
         });
         return;
@@ -1354,6 +1406,10 @@ const login = async (req, res, next) => {
         message: err.message,
         data: {
           success: 0,
+          phoneVerified: 0,
+          clinicVerified: 0,
+          active: 0,
+          activeRequested: 0,
         },
       });
       return;
@@ -1366,29 +1422,17 @@ const login = async (req, res, next) => {
         // throw new Error("Account does not exist");
         res.json({
           serverError: 0,
-
-          message: "Family account not found",
+          message: "We couldn't find record with this phone number",
           data: {
             success: 0,
+            phoneVerified: 0,
+            clinicVerified: 0,
+            active: 0,
+            activeRequested: 0,
           },
         });
         return;
       } else {
-        // let foundFamilyAccount = File.fineOne({
-        //   phoneNumber: existingUser?.phoneNumber,
-        // });
-        if (existingUser.clinicVerified === false) {
-          // throw new Error("Your account has not verified from the clinic yet");
-          res.json({
-            serverError: 0,
-            message: "Your account has not verified from the clinic yet",
-            data: {
-              success: 0,
-            },
-          });
-          return;
-        }
-
         if (existingUser.phoneVerified === false) {
           let otp = otpGenerator.generate(4, {
             lowerCaseAlphabets: false,
@@ -1427,6 +1471,10 @@ const login = async (req, res, next) => {
                   message: "Somthing went wrong",
                   data: {
                     success: 0,
+                    phoneVerified: 0,
+                    clinicVerified: 0,
+                    active: 0,
+                    activeRequested: 0,
                   },
                 });
               return;
@@ -1434,12 +1482,17 @@ const login = async (req, res, next) => {
               // sendPhoneOtp(phoneExist?.phoneNumber, otp);
               res.json({
                 serverError: 0,
-                message: "OTP Sent to Phone Number",
+                message:
+                  "Please verify your Mobile Number to activate your account.",
                 data: {
                   fileId: existingUser?._id,
                   otp: otp,
+                  success: 0,
                   phoneVerified: 0,
-                  success: 1,
+                  clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+                  active: existingUser?.active === true ? 1 : 0,
+                  activeRequested:
+                    existingUser?.activeRequested === true ? 1 : 0,
                 },
               });
               return;
@@ -1448,19 +1501,50 @@ const login = async (req, res, next) => {
 
           return;
         }
-
-        if (existingUser.active === false) {
-          console.log("i am thereeeeeeeeee");
+        if (existingUser.clinicVerified === false) {
           res.json({
             serverError: 0,
-
-            message: "Your account has not been activated from the clinic yet",
+            message:
+              "We are still reviewing your details and will get back to you soon to activate account.",
             data: {
               success: 0,
+              phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+              clinicVerified: 0,
+              active: existingUser?.active === true ? 1 : 0,
+              activeRequested: existingUser?.activeRequested === true ? 1 : 0,
             },
           });
           return;
         }
+
+        if (existingUser.activeRequested === true) {
+          res.json({
+            serverError: 0,
+            message:
+              "We are still reviewing your details and will get back to you soon to activate account.",
+            data: {
+              success: 0,
+              phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+              clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+              active: existingUser?.active === true ? 1 : 0,
+              activeRequested: 0,
+            },
+          });
+          return;
+        }
+
+        // if (existingUser.active === false) {
+        //   console.log("i am thereeeeeeeeee");
+        //   res.json({
+        //     serverError: 0,
+
+        //     message: "Your account has not been activated from the clinic yet",
+        //     data: {
+        //       success: 0,
+        //     },
+        //   });
+        //   return;
+        // }
 
         let isValidPassword = false;
         try {
@@ -1480,6 +1564,10 @@ const login = async (req, res, next) => {
             message: "Wrong Password",
             data: {
               success: 0,
+              phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+              clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+              active: existingUser?.active === true ? 1 : 0,
+              activeRequested: existingUser?.activeRequested === true ? 1 : 0,
             },
           });
           return;
@@ -1557,6 +1645,9 @@ const login = async (req, res, next) => {
             // familyMembers,
             success: 1,
             phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+            clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+            active: existingUser?.active === true ? 1 : 0,
+            activeRequested: existingUser?.activeRequested === true ? 1 : 0,
           },
         });
         return;
@@ -1569,6 +1660,10 @@ const login = async (req, res, next) => {
         message: err.message,
         data: {
           success: 0,
+          phoneVerified: 0,
+          clinicVerified: 0,
+          active: 0,
+          activeRequested: 0,
         },
       });
       return;
@@ -1966,27 +2061,19 @@ const requestNewOtp = async (req, res) => {
 const requestForgotOtp = async (req, res) => {
   console.log(req.body);
   const { phoneNumber } = req.body;
-  let phoneExist = await File.findOne({ phoneNumber: phoneNumber }, "_id");
+  let phoneExist = await File.findOne({ phoneNumber: phoneNumber });
   if (!phoneExist) {
-    // res.json({
-    //   success: false,
-    //   message: "Phonenumber is not registered with us",
-    // });
-    // return;
     res.json({
       serverError: 0,
-
-      message: "Phonenumber is not registered with us",
+      message: "We couldn't find record with this mobile number.",
       data: {
         success: 0,
       },
     });
     return;
   }
+  // if(phoneExist)
   let otp = otpGenerator.generate(4, {
-    // upperCase: false,
-    // specialChars: false,
-    // alphabets: false,
     lowerCaseAlphabets: false,
     upperCaseAlphabets: false,
     specialChars: false,
@@ -2024,7 +2111,6 @@ const requestForgotOtp = async (req, res) => {
         // });
         res.json({
           serverError: 1,
-
           message: "Somthing went wrong",
           data: {
             success: 0,
@@ -2032,16 +2118,10 @@ const requestForgotOtp = async (req, res) => {
         });
       return;
     } else {
-      // sendPhoneOtp(phoneNumber, otp);
-      // res.json({
-      //   success: true,
-      //   message: "OTP Sent to Phone Number",
-      //   fileId: phoneExist._id,
-      // });
       res.json({
         serverError: 0,
-
-        message: "OTP Sent to Phone Number",
+        message:
+          "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
         data: {
           fileId: phoneExist._id,
           success: 1,
@@ -2063,14 +2143,9 @@ const verifyForgotOtp = async (req, res) => {
   if (found) {
     if (found.expires > Date.now()) {
       if (found.otp === otp) {
-        // res.json({
-        //   success: true,
-        //   message: "OTP got verified",
-        // });
         res.json({
           serverError: 0,
-
-          message: "OTP got verified",
+          message: "Thanks for verifying your Mobile Number",
           data: {
             success: 1,
           },
@@ -2080,8 +2155,7 @@ const verifyForgotOtp = async (req, res) => {
         // res.json({ success: false, message: "OTP is wrong" });
         res.json({
           serverError: 0,
-
-          message: "OTP is wrong",
+          message: "You have entered an Incorrect OTP Code, please try again.",
           data: {
             success: 0,
           },
@@ -2089,14 +2163,9 @@ const verifyForgotOtp = async (req, res) => {
         return;
       }
     } else {
-      // res.json({
-      //   success: false,
-      //   message: "OTP got expired. Request the new one",
-      // });
       res.json({
         serverError: 0,
-
-        message: "OTP got expired. Request the new one",
+        message: "OTP got expired. Kindly request the new one",
         data: {
           success: 0,
         },
@@ -2107,7 +2176,6 @@ const verifyForgotOtp = async (req, res) => {
     // res.json({ success: false, message: "Kindly request the OTP Again" });
     res.json({
       serverError: 0,
-
       message: "Kindly request the OTP Again",
       data: {
         success: 0,
