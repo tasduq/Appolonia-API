@@ -1,10 +1,12 @@
 const User = require("../Models/User");
 const Role = require("../Models/Role");
 const File = require("../Models/File");
+const Scans = require("../Models/Scans");
 
 var CryptoJS = require("crypto-js");
 
 const getFileFamilyMembers = async (req, res) => {
+  console.log(req.headers);
   console.log(req.body);
   const { fileId } = req.body;
 
@@ -49,17 +51,30 @@ const getFileFamilyMembers = async (req, res) => {
   console.log(connectedFamily, "i am connectedfamily");
 
   let yoo = [];
-  for (member of connectedFamily) {
-    yoo.push({
+  yoo = connectedFamily.map(async (member) => {
+    let userScans = await Scans.find({ userId: member._id }).limit(5);
+
+    return {
       firstName: member.firstName,
       lastName: member.lastName,
       fileNumber: member.uniqueId1,
       emiratesId: member.uniqueId2,
       userId: member._id,
-    });
-  }
-
-  console.log(yoo);
+      phoneNumber: member?.phoneNumber,
+      email: member?.email,
+      gender: member?.gender,
+      city: member?.city,
+      assignedDoctorId: member?.assignedDoctorId
+        ? member?.assignedDoctorId
+        : "",
+      assignedDoctorName: "Testdoctor",
+      role: member?.role,
+      image: member?.image ? member?.image : "",
+      scans: userScans,
+    };
+  });
+  let resolvedFamilyData = await Promise.all(yoo);
+  console.log(resolvedFamilyData);
 
   if (foundFile) {
     res.json({
@@ -67,7 +82,7 @@ const getFileFamilyMembers = async (req, res) => {
       message: "File Found",
       data: {
         success: 1,
-        foundFamily: yoo,
+        foundFamily: resolvedFamilyData,
       },
     });
   } else {

@@ -1579,7 +1579,7 @@ const login = async (req, res, next) => {
               phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
               clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
               active: existingUser?.active === true ? 1 : 0,
-              activeRequested: 0,
+              activeRequested: 1,
             },
           });
           return;
