@@ -2100,6 +2100,7 @@ const requestNewOtp = async (req, res) => {
         message: "OTP Sent to Phone Number",
         data: {
           fileId: fileId,
+          otp: otp,
           success: 1,
         },
       });
@@ -2176,6 +2177,7 @@ const requestForgotOtp = async (req, res) => {
           "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
         data: {
           fileId: phoneExist._id,
+          otp: otp,
           success: 1,
         },
       });
