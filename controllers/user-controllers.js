@@ -1303,23 +1303,7 @@ const login = async (req, res, next) => {
           return;
         }
 
-        if (existingUser.activeRequested === true) {
-          res.json({
-            serverError: 0,
-            message:
-              "We are still reviewing your details and will get back to you soon to activate account.",
-            data: {
-              success: 0,
-              phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
-              clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
-              active: existingUser?.active === true ? 1 : 0,
-              activeRequested: 1,
-            },
-          });
-          return;
-        }
-
-        // if (existingUser.active === false) {
+        // if (existingUser.activeRequested === true) {
         //   res.json({
         //     serverError: 0,
         //     message:
@@ -1328,12 +1312,29 @@ const login = async (req, res, next) => {
         //       success: 0,
         //       phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
         //       clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
-        //       active: 0,
-        //       activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+        //       active: existingUser?.active === true ? 1 : 0,
+        //       activeRequested: 1,
         //     },
         //   });
         //   return;
         // }
+
+        if (existingUser.active === false) {
+          console.log("i am thereeeeeeeeee");
+          res.json({
+            serverError: 0,
+            message:
+              "We are still reviewing your details and will get back to you soon to activate account.",
+            data: {
+              success: 0,
+              phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+              clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+              active: 0,
+              activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+            },
+          });
+          return;
+        }
 
         let isValidPassword = false;
         try {
@@ -1569,7 +1570,24 @@ const login = async (req, res, next) => {
           return;
         }
 
-        if (existingUser.activeRequested === true) {
+        // if (existingUser.activeRequested === false) {
+        //   res.json({
+        //     serverError: 0,
+        //     message:
+        //       "We are still reviewing your details and will get back to you soon to activate account.",
+        //     data: {
+        //       success: 0,
+        //       phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
+        //       clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
+        //       active: existingUser?.active === true ? 1 : 0,
+        //       activeRequested:0,
+        //     },
+        //   });
+        //   return;
+        // }
+
+        if (existingUser.active === false) {
+          console.log("i am thereeeeeeeeee");
           res.json({
             serverError: 0,
             message:
@@ -1578,25 +1596,12 @@ const login = async (req, res, next) => {
               success: 0,
               phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
               clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
-              active: existingUser?.active === true ? 1 : 0,
-              activeRequested: 1,
+              active: 0,
+              activeRequested: existingUser?.activeRequested === true ? 1 : 0,
             },
           });
           return;
         }
-
-        // if (existingUser.active === false) {
-        //   console.log("i am thereeeeeeeeee");
-        //   res.json({
-        //     serverError: 0,
-
-        //     message: "Your account has not been activated from the clinic yet",
-        //     data: {
-        //       success: 0,
-        //     },
-        //   });
-        //   return;
-        // }
 
         let isValidPassword = false;
         try {
