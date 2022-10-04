@@ -334,10 +334,7 @@ const checkPatient = async (req, res) => {
           return;
         }
 
-        if (
-          fileExist.clinicVerified === false &&
-          fileExist?.phoneVerified === false
-        ) {
+        if (fileExist?.phoneVerified === false) {
           let foundForgotPhone = await Filephoneverified.findOne({
             fileId: fileExist._id,
           });
@@ -366,77 +363,95 @@ const checkPatient = async (req, res) => {
             if (err) {
               throw new Error("Error saving the OTP");
             } else {
+              res.json({
+                serverError: 0,
+                message:
+                  "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
+                data: {
+                  fileId: fileExist._id,
+                  success: 0,
+                  clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
+                  isExisting: 1,
+                  active: 0,
+                  activeRequested: 0,
+                  phoneVerified: 0,
+                  otp: otp,
+                },
+              });
+              return;
             }
           });
+        } else {
           res.json({
             serverError: 0,
             message:
-              "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
+              fileExist?.clinicVerified === true
+                ? "Your account is verified try logging in"
+                : "We are still reviewing your details and will get back to you soon to activate account.",
             data: {
               fileId: fileExist._id,
-              success: 0,
-              clinicVerified: 0,
+              success: fileExist?.clinicVerified === true ? 1 : 0,
+              clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
               isExisting: 1,
-              active: 0,
-              activeRequested: 0,
-              phoneVerified: 0,
-              otp: otp,
+              active: fileExist?.active === true ? 1 : 0,
+              activeRequested: fileExist?.activeRequested === true ? 1 : 0,
+              phoneVerified: 1,
             },
           });
           return;
         }
 
-        if (
-          fileExist.clinicVerified === true &&
-          fileExist?.phoneVerified === false
-        ) {
-          let foundForgotPhone = await Filephoneverified.findOne({
-            fileId: fileExist._id,
-          });
+        // if (
+        //   fileExist.clinicVerified === true &&
+        //   fileExist?.phoneVerified === false
+        // ) {
+        //   let foundForgotPhone = await Filephoneverified.findOne({
+        //     fileId: fileExist._id,
+        //   });
 
-          if (foundForgotPhone) {
-            Filephoneverified.deleteOne(
-              { fileId: fileExist._id },
-              async (err) => {
-                if (err) {
-                  throw new Error("Error deleting the OTP Session");
-                } else {
-                  console.log("deleted previous");
-                }
-              }
-            );
-          }
-          // sendPhoneOtp(fileExist.phoneNumber, otp);
-          // sendEmailOtp(email, otp);
+        //   if (foundForgotPhone) {
+        //     Filephoneverified.deleteOne(
+        //       { fileId: fileExist._id },
+        //       async (err) => {
+        //         if (err) {
+        //           throw new Error("Error deleting the OTP Session");
+        //         } else {
+        //           console.log("deleted previous");
+        //         }
+        //       }
+        //     );
+        //   }
+        //   // sendPhoneOtp(fileExist.phoneNumber, otp);
+        //   // sendEmailOtp(email, otp);
 
-          const createdFilephoneverification = new Filephoneverified({
-            otp: otp,
-            fileId: fileExist._id,
-          });
+        //   const createdFilephoneverification = new Filephoneverified({
+        //     otp: otp,
+        //     fileId: fileExist._id,
+        //   });
 
-          createdFilephoneverification.save((err) => {
-            if (err) {
-              throw new Error("Error saving the OTP");
-            } else {
-            }
-          });
-          res.json({
-            serverError: 0,
-            message:
-              " We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
-            data: {
-              fileId: fileExist._id,
-              success: 0,
-              clinicVerified: 1,
-              isExisting: 1,
-              active: 0,
-              activeRequested: 0,
-              phoneVerified: 0,
-              otp: otp,
-            },
-          });
-          return;
-        }
+        //   createdFilephoneverification.save((err) => {
+        //     if (err) {
+        //       throw new Error("Error saving the OTP");
+        //     } else {
+        //       res.json({
+        //         serverError: 0,
+        //         message:
+        //           " We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
+        //         data: {
+        //           fileId: fileExist._id,
+        //           success: 0,
+        //           clinicVerified: 1,
+        //           isExisting: 1,
+        //           active: 0,
+        //           activeRequested: 0,
+        //           phoneVerified: 0,
+        //           otp: otp,
+        //         },
+        //       });
+        //       return;
+        //     }
+        //   });
+        // }
 
         // res.json({
         //   serverError: 0,
@@ -491,6 +506,7 @@ const checkPatient = async (req, res) => {
         return;
       } else {
         if (fileExist.active === true) {
+          console.log("in active check");
           res.json({
             serverError: 0,
             message: "This account is already active. Try logging in",
@@ -507,6 +523,7 @@ const checkPatient = async (req, res) => {
         }
 
         if (fileExist.activeRequested === true) {
+          console.log("in active requested");
           res.json({
             serverError: 0,
             message:
@@ -523,10 +540,7 @@ const checkPatient = async (req, res) => {
           return;
         }
 
-        if (
-          fileExist.clinicVerified === false &&
-          fileExist?.phoneVerified === false
-        ) {
+        if (fileExist?.phoneVerified === false) {
           let foundForgotPhone = await Filephoneverified.findOne({
             fileId: fileExist._id,
           });
@@ -555,77 +569,95 @@ const checkPatient = async (req, res) => {
             if (err) {
               throw new Error("Error saving the OTP");
             } else {
+              res.json({
+                serverError: 0,
+                message:
+                  "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
+                data: {
+                  fileId: fileExist._id,
+                  success: 0,
+                  clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
+                  isExisting: 1,
+                  active: 0,
+                  activeRequested: 0,
+                  phoneVerified: 0,
+                  otp: otp,
+                },
+              });
+              return;
             }
           });
+        } else {
           res.json({
             serverError: 0,
             message:
-              "We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
+              fileExist?.clinicVerified === true
+                ? "Your account is verified try logging in"
+                : "We are still reviewing your details and will get back to you soon to activate account.",
             data: {
               fileId: fileExist._id,
-              success: 0,
-              clinicVerified: 0,
+              success: fileExist?.clinicVerified === true ? 1 : 0,
+              clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
               isExisting: 1,
-              active: 0,
-              activeRequested: 0,
-              phoneVerified: 0,
-              otp: otp,
+              active: fileExist?.active === true ? 1 : 0,
+              activeRequested: fileExist?.activeRequested === true ? 1 : 0,
+              phoneVerified: 1,
             },
           });
           return;
         }
 
-        if (
-          fileExist.clinicVerified === true &&
-          fileExist?.phoneVerified === false
-        ) {
-          let foundForgotPhone = await Filephoneverified.findOne({
-            fileId: fileExist._id,
-          });
+        // if (
+        //   fileExist.clinicVerified === true &&
+        //   fileExist?.phoneVerified === false
+        // ) {
+        //   let foundForgotPhone = await Filephoneverified.findOne({
+        //     fileId: fileExist._id,
+        //   });
 
-          if (foundForgotPhone) {
-            Filephoneverified.deleteOne(
-              { fileId: fileExist._id },
-              async (err) => {
-                if (err) {
-                  throw new Error("Error deleting the OTP Session");
-                } else {
-                  console.log("deleted previous");
-                }
-              }
-            );
-          }
-          // sendPhoneOtp(fileExist.phoneNumber, otp);
-          // sendEmailOtp(email, otp);
+        //   if (foundForgotPhone) {
+        //     Filephoneverified.deleteOne(
+        //       { fileId: fileExist._id },
+        //       async (err) => {
+        //         if (err) {
+        //           throw new Error("Error deleting the OTP Session");
+        //         } else {
+        //           console.log("deleted previous");
+        //         }
+        //       }
+        //     );
+        //   }
+        //   // sendPhoneOtp(fileExist.phoneNumber, otp);
+        //   // sendEmailOtp(email, otp);
 
-          const createdFilephoneverification = new Filephoneverified({
-            otp: otp,
-            fileId: fileExist._id,
-          });
+        //   const createdFilephoneverification = new Filephoneverified({
+        //     otp: otp,
+        //     fileId: fileExist._id,
+        //   });
 
-          createdFilephoneverification.save((err) => {
-            if (err) {
-              throw new Error("Error saving the OTP");
-            } else {
-            }
-          });
-          res.json({
-            serverError: 0,
-            message:
-              " We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
-            data: {
-              fileId: fileExist._id,
-              success: 0,
-              clinicVerified: 1,
-              isExisting: 1,
-              active: 0,
-              activeRequested: 0,
-              phoneVerified: 0,
-              otp: otp,
-            },
-          });
-          return;
-        }
+        //   createdFilephoneverification.save((err) => {
+        //     if (err) {
+        //       throw new Error("Error saving the OTP");
+        //     } else {
+        //       res.json({
+        //         serverError: 0,
+        //         message:
+        //           " We have sent OTP to your registered Mobile Number and Email ID, please enter now to proceed.",
+        //         data: {
+        //           fileId: fileExist._id,
+        //           success: 0,
+        //           clinicVerified: 1,
+        //           isExisting: 1,
+        //           active: 0,
+        //           activeRequested: 0,
+        //           phoneVerified: 0,
+        //           otp: otp,
+        //         },
+        //       });
+        //       return;
+        //     }
+        //   });
+        // }
 
         // res.json({
         //   serverError: 0,
@@ -1278,7 +1310,7 @@ const login = async (req, res, next) => {
               phoneVerified: existingUser?.phoneVerified === true ? 1 : 0,
               clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
               active: existingUser?.active === true ? 1 : 0,
-              activeRequested: 0,
+              activeRequested: 1,
             },
           });
           return;
