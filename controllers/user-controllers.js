@@ -882,6 +882,9 @@ const signup = async (req, res, next) => {
                           userId: userDoc._id,
                         },
                       },
+                      $set: {
+                        activeRequested: true,
+                      },
                     },
                     (err) => {
                       if (err) {
