@@ -25,7 +25,7 @@ const newChat = async (req, res) => {
 
     if (foundConversation === true) {
       res.json({
-        errorCode: 0,
+        serverCode: 0,
         message: "You already have a conversation on going",
         data: {
           success: 0,
@@ -57,7 +57,7 @@ const newChat = async (req, res) => {
               throw new Error("Error Creating the message");
             } else {
               res.json({
-                errorCode: 0,
+                serverCode: 0,
                 message: "Message Sent",
                 data: {
                   success: 1,
@@ -69,7 +69,7 @@ const newChat = async (req, res) => {
       });
     } catch (err) {
       res.json({
-        errorCode: 1,
+        serverCode: 1,
         message: err.message,
         data: {
           success: 0,
@@ -81,26 +81,52 @@ const newChat = async (req, res) => {
 
 const getConversations = async (req, res) => {
   console.log(req.body);
-  let conversations = await Conversation.find({
-    members: { $in: [req.body.userId] },
-  });
-
-  if (conversations?.length > 0) {
-    res.json({
-      errorCode: 0,
-      message: "Found conversations",
-      data: {
-        success: 1,
-        conversations: conversations,
-      },
+  try {
+    let conversations = await Conversation.find({
+      members: { $in: [req.body.userId] },
     });
-  } else {
+
+    let conversationsFiltered = conversations.map((convo) => {
+      return {
+        conversationId: convo._id,
+        otherMemberId: convo?.members?.find(
+          (memberId) => memberId !== req.body.userId
+        ),
+        otherMemberData: convo.membersData.find((memberData) => {
+          return memberData.id !== req.body.userId;
+        }),
+        createdAt: convo.createdAt,
+        updatedAt: convo.updatedAt,
+      };
+    });
+
+    console.log(conversationsFiltered);
+
+    if (conversations?.length > 0) {
+      res.json({
+        serverCode: 0,
+        message: "Found conversations",
+        data: {
+          success: 1,
+          conversations: conversationsFiltered,
+        },
+      });
+    } else {
+      res.json({
+        serverCode: 0,
+        message: "Found no conversations",
+        data: {
+          success: 0,
+          conversations: conversations,
+        },
+      });
+    }
+  } catch (err) {
     res.json({
-      errorCode: 0,
-      message: "Found no conversations",
+      serverCode: 1,
+      message: err.message,
       data: {
         success: 0,
-        conversations: conversations,
       },
     });
   }
@@ -120,7 +146,7 @@ const getConversationMessages = async (req, res) => {
 
     if (foundMessages.length > 0) {
       res.json({
-        errorCode: 0,
+        serverCode: 0,
         message: "Messages Found",
         data: {
           success: 1,
@@ -131,7 +157,7 @@ const getConversationMessages = async (req, res) => {
   } catch (err) {
     console.log(err);
     res.json({
-      errorCode: 1,
+      serverCode: 1,
       message: err.message,
       data: {
         success: 0,
@@ -156,7 +182,7 @@ const newMessage = (async = (req, res) => {
           throw new Error("Error saving Message");
         } else {
           res.json({
-            errorCode: 0,
+            serverCode: 0,
             data: {
               success: 1,
             },
@@ -170,7 +196,7 @@ const newMessage = (async = (req, res) => {
   } catch (err) {
     console.log(err);
     res.json({
-      errorCode: 1,
+      serverCode: 1,
       message: err.message,
       data: {
         success: 0,
