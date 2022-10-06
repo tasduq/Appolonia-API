@@ -6,18 +6,22 @@ const Message = require("../Models/Messages");
 
 const newChat = async (req, res) => {
   console.log(req.body);
-  const { senderId, receiverId, message, scanId } = req.body;
+  const { senderId, receiverId, message, scanId, format } = req.body;
   if ((senderId, receiverId, message)) {
     let conversations = await Conversation.find({
       members: { $in: [senderId] },
     });
 
     let foundConversation = false;
+    let foundConversationId;
     let i = 0;
     while (i < conversations?.length && foundConversation === false) {
       foundConversation = conversations[i].members.some(
         (member) => member === receiverId
       );
+      if (foundConversation === true) {
+        foundConversationId = conversations[i]._id;
+      }
       i++;
     }
 
@@ -30,17 +34,16 @@ const newChat = async (req, res) => {
         data: {
           success: 0,
           chatExist: 1,
-          conversationId: foundConversation?._id,
+          conversationId: foundConversationId,
         },
       });
       return;
     }
 
-    let membersData = new User.find({ _id: { $in: [senderId, receiverId] } }, [
-      "firstName",
-      "lastName",
-      "image",
-    ]);
+    let membersData = await User.find(
+      { _id: { $in: [senderId, receiverId] } },
+      ["firstName", "lastName", "image"]
+    );
 
     membersData = membersData.map((member) => {
       return {
@@ -49,6 +52,7 @@ const newChat = async (req, res) => {
         image: member.image,
       };
     });
+    console.log(membersData);
 
     let createdConversation = new Conversation({
       members: [senderId, receiverId],
@@ -61,25 +65,88 @@ const newChat = async (req, res) => {
           throw new Error("Error Creating the Chat");
         } else {
           console.log(doc, "doc there");
-          let createdMessage = new Message({
-            conversationId: doc._id,
-            senderId: senderId,
-            message: message,
-          });
+          if (format === "scanImage") {
+            for (let i = 0; i < 2; i++) {
+              if (i === 0) {
+                let createdMessage = new Message({
+                  conversationId: doc._id,
+                  senderId: senderId,
+                  message:
+                    "Hi Doctor, please review my scans and let me know your feedback.",
+                  format: "text",
+                  scanId: scanId?.length > 0 ? scanId : "",
+                });
 
-          createdMessage.save((err) => {
-            if (err) {
-              throw new Error("Error Creating the message");
-            } else {
-              res.json({
-                serverError: 0,
-                message: "Message Sent",
-                data: {
-                  success: 1,
-                },
-              });
+                createdMessage.save((err) => {
+                  if (err) {
+                    throw new Error("Error Creating the message");
+                  } else {
+                    // res.json({
+                    //   serverError: 0,
+                    //   message: "Message Sent",
+                    //   data: {
+                    //     success: 1,
+                    //   },
+                    // });
+                    return;
+                  }
+                });
+              } else {
+                let createdMessage = new Message({
+                  conversationId: doc._id,
+                  senderId: senderId,
+                  message: message,
+                  format: "scanImage",
+                  scanId: scanId.length > 0 ? scanId : "",
+                });
+
+                createdMessage.save((err) => {
+                  if (err) {
+                    throw new Error("Error Creating the message");
+                  } else {
+                    // res.json({
+                    //   serverError: 0,
+                    //   message: "Message Sent",
+                    //   data: {
+                    //     success: 1,
+                    //   },
+                    // });
+                    return;
+                  }
+                });
+              }
             }
-          });
+            res.json({
+              serverError: 0,
+              message: "Message Sent",
+              data: {
+                success: 1,
+              },
+            });
+          } else {
+            let createdMessage = new Message({
+              conversationId: doc._id,
+              senderId: senderId,
+              message: message,
+              format: format,
+              scanId: scanId.length > 0 ? scanId : "",
+            });
+
+            createdMessage.save((err) => {
+              if (err) {
+                throw new Error("Error Creating the message");
+              } else {
+                res.json({
+                  serverError: 0,
+                  message: "Message Sent",
+                  data: {
+                    success: 1,
+                  },
+                });
+                return;
+              }
+            });
+          }
         }
       });
     } catch (err) {
@@ -183,28 +250,91 @@ const getConversationMessages = async (req, res) => {
 
 const newMessage = (async = (req, res) => {
   console.log(req.body);
-  const { conversationId, senderId, message } = req.body;
+  const { conversationId, senderId, message, scanId, format } = req.body;
   try {
     if ((conversationId, senderId, message)) {
-      let createdMessage = new Message({
-        conversationId,
-        senderId,
-        message,
-      });
-      createdMessage.save((err) => {
-        if (err) {
-          console.log(err);
-          throw new Error("Error saving Message");
-        } else {
-          res.json({
-            serverError: 0,
-            data: {
-              success: 1,
-            },
-            message: "message saved",
-          });
+      if (format === "scanImage") {
+        for (let i = 0; i < 2; i++) {
+          if (i === 0) {
+            let createdMessage = new Message({
+              conversationId: conversationId,
+              senderId: senderId,
+              message:
+                "Hi Doctor, please review my scans and let me know your feedback.",
+              format: "text",
+              scanId: scanId?.length > 0 ? scanId : "",
+            });
+
+            createdMessage.save((err) => {
+              if (err) {
+                throw new Error("Error Creating the message");
+              } else {
+                // res.json({
+                //   serverError: 0,
+                //   message: "Message Sent",
+                //   data: {
+                //     success: 1,
+                //   },
+                // });
+                return;
+              }
+            });
+          } else {
+            let createdMessage = new Message({
+              conversationId: conversationId,
+              senderId: senderId,
+              message: message,
+              format: "scanImage",
+              scanId: scanId.length > 0 ? scanId : "",
+            });
+
+            createdMessage.save((err) => {
+              if (err) {
+                throw new Error("Error Creating the message");
+              } else {
+                // res.json({
+                //   serverError: 0,
+                //   message: "Message Sent",
+                //   data: {
+                //     success: 1,
+                //   },
+                // });
+                return;
+              }
+            });
+          }
         }
-      });
+        res.json({
+          serverError: 0,
+          message: "Message Sent",
+          data: {
+            success: 1,
+          },
+        });
+      } else {
+        let createdMessage = new Message({
+          conversationId: conversationId,
+          senderId: senderId,
+          message: message,
+          format: format,
+          scanId: scanId?.length > 0 ? scanId : "",
+        });
+
+        createdMessage.save((err) => {
+          if (err) {
+            throw new Error("Error Creating the message");
+          } else {
+            res.json({
+              serverError: 0,
+              message: "Message Sent",
+              data: {
+                success: 1,
+              },
+            });
+            return;
+          }
+        });
+      }
     } else {
       throw new Error("Somthing is missing");
     }

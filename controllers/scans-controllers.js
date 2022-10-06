@@ -20,11 +20,12 @@ const submitScans = async (req, res) => {
           throw new Error("Error saving scans");
         } else {
           res.json({
-            errorCode: 0,
+            serverError: 0,
             message: "Successfully saved scans",
             data: {
               success: 1,
               scanId: doc?._id,
+              scanFirstImage: scanImages[0],
             },
           });
           return;
@@ -33,7 +34,7 @@ const submitScans = async (req, res) => {
     } else {
       // throw new Error("Provide all the details");
       res.json({
-        errorCode: 0,
+        serverError: 0,
         message: "Send all the data please",
         data: {
           success: 0,
@@ -43,7 +44,7 @@ const submitScans = async (req, res) => {
     }
   } catch (err) {
     res.json({
-      errorCode: 1,
+      serverError: 1,
       message: err.message,
       data: {
         success: 0,
@@ -62,7 +63,7 @@ const getMyScans = async (req, res) => {
       console.log(foundScans);
       if (foundScans.length > 0) {
         res.json({
-          errorCode: 0,
+          serverError: 0,
           message: "found scans",
           data: {
             success: 1,
@@ -72,7 +73,7 @@ const getMyScans = async (req, res) => {
         return;
       } else {
         res.json({
-          errorCode: 0,
+          serverError: 0,
           message: "No Scans found",
           data: {
             success: 0,
@@ -84,7 +85,7 @@ const getMyScans = async (req, res) => {
     } else {
       // throw new Error("User id is missing");
       res.json({
-        errorCode: 0,
+        serverError: 0,
         message: "User id is missing",
         data: {
           success: 0,
@@ -95,7 +96,7 @@ const getMyScans = async (req, res) => {
   } catch (err) {
     // res.json({ success: false, message: err.message });
     res.json({
-      errorCode: 1,
+      serverError: 1,
       message: err.message,
       data: {
         success: 0,
@@ -112,7 +113,7 @@ const getAllScans = async (req, res) => {
     let foundScans = await Scans.find({});
     console.log(foundScans, "i am found");
     res.json({
-      errorCode: 0,
+      serverError: 0,
       message: "found scans",
       data: {
         success: 1,
@@ -123,7 +124,7 @@ const getAllScans = async (req, res) => {
   } catch (err) {
     // res.json({ success: false, message: err.message });
     res.json({
-      errorCode: 1,
+      serverError: 1,
       message: err.message,
       data: {
         success: 0,
