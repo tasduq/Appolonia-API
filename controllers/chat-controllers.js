@@ -6,7 +6,7 @@ const Message = require("../Models/Messages");
 
 const newChat = async (req, res) => {
   console.log(req.body);
-  const { senderId, receiverId, message, membersData } = req.body;
+  const { senderId, receiverId, message, scanId } = req.body;
   if ((senderId, receiverId, message)) {
     let conversations = await Conversation.find({
       members: { $in: [senderId] },
@@ -30,10 +30,25 @@ const newChat = async (req, res) => {
         data: {
           success: 0,
           chatExist: 1,
+          conversationId: foundConversation?._id,
         },
       });
       return;
     }
+
+    let membersData = new User.find({ _id: { $in: [senderId, receiverId] } }, [
+      "firstName",
+      "lastName",
+      "image",
+    ]);
+
+    membersData = membersData.map((member) => {
+      return {
+        name: `${member.firstName} ${member.lastName}`,
+        id: member._id,
+        image: member.image,
+      };
+    });
 
     let createdConversation = new Conversation({
       members: [senderId, receiverId],

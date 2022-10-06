@@ -8,6 +8,8 @@ const messagesSchema = new Schema(
     conversationId: { type: String },
     senderId: { type: String },
     message: { type: String },
+    format: { type: String },
+    scanId: { type: String },
   },
   { timestamps: true }
 );

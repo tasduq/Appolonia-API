@@ -15,7 +15,7 @@ const submitScans = async (req, res) => {
         scanImages,
         created: Date.now(),
       });
-      createdScan.save((err) => {
+      createdScan.save((err, doc) => {
         if (err) {
           throw new Error("Error saving scans");
         } else {
@@ -24,6 +24,7 @@ const submitScans = async (req, res) => {
             message: "Successfully saved scans",
             data: {
               success: 1,
+              scanId: doc?._id,
             },
           });
           return;
@@ -59,15 +60,27 @@ const getMyScans = async (req, res) => {
     if (userId) {
       let foundScans = await Scans.find({ userId: userId });
       console.log(foundScans);
-      res.json({
-        errorCode: 0,
-        message: "found scans",
-        data: {
-          success: 1,
-          scans: foundScans,
-        },
-      });
-      return;
+      if (foundScans.length > 0) {
+        res.json({
+          errorCode: 0,
+          message: "found scans",
+          data: {
+            success: 1,
+            scans: foundScans,
+          },
+        });
+        return;
+      } else {
+        res.json({
+          errorCode: 0,
+          message: "No Scans found",
+          data: {
+            success: 0,
+            scans: foundScans,
+          },
+        });
+        return;
+      }
     } else {
       // throw new Error("User id is missing");
       res.json({
