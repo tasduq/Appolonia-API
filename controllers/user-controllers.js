@@ -1471,6 +1471,7 @@ const login = async (req, res, next) => {
   } else {
     try {
       existingUser = await File.findOne({ phoneNumber: phoneNumber });
+      console.log(existingUser, "i am existing");
 
       if (!existingUser) {
         // throw new Error("Account does not exist");
@@ -1671,7 +1672,8 @@ const login = async (req, res, next) => {
           (member) => member.uniqueId === existingUser.uniqueId
         );
         familyHead = await User.findOne({ _id: familyHead?.userId });
-        let userScans = await Scans.find({ userId: familyHead._id }).limit(5);
+        console.log("i am familyHead", familyHead);
+        let userScans = await Scans.find({ userId: familyHead?._id }).limit(5);
         console.log(userScans, "i am scans");
         familyHead = {
           _id: familyHead?._id,
