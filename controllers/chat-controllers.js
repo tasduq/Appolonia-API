@@ -216,7 +216,7 @@ const getConversations = async (req, res) => {
 
 const getConversationMessages = async (req, res) => {
   console.log(req.body);
-  const { conversationId, bottomHit } = req.body;
+  const { conversationId, bottomHit, userId } = req.body;
   try {
     console.log("sea");
     let foundMessages = await Message.find({ conversationId: conversationId })
@@ -224,7 +224,20 @@ const getConversationMessages = async (req, res) => {
       .skip(bottomHit > 0 ? (bottomHit - 1) * 10 : 0)
       .limit(10);
 
-    console.log(foundMessages.length, "foundMessages");
+    console.log(foundMessages, "foundMessages");
+    foundMessages = foundMessages.map((msg) => {
+      console.log(msg);
+      return {
+        conversationId: msg.conversationId,
+        senderId: msg.senderId,
+        message: msg.message,
+        format: msg.format,
+        scanId: msg.scanId,
+        createdAt: msg.createdAt,
+        updatedAt: msg.updatedAt,
+        isSender: msg.senderId === userId ? true : false,
+      };
+    });
 
     if (foundMessages.length > 0) {
       res.json({
