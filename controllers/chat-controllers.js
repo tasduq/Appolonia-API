@@ -220,7 +220,7 @@ const getConversationMessages = async (req, res) => {
   try {
     console.log("sea");
     let foundMessages = await Message.find({ conversationId: conversationId })
-      .sort({ _id: 1 })
+      .sort({ _id: -1 })
       .skip(bottomHit > 0 ? (bottomHit - 1) * 10 : 0)
       .limit(10);
 
@@ -245,6 +245,15 @@ const getConversationMessages = async (req, res) => {
         message: "Messages Found",
         data: {
           success: 1,
+          messages: foundMessages,
+        },
+      });
+    } else {
+      res.json({
+        serverError: 0,
+        message: "No messages Found",
+        data: {
+          success: 0,
           messages: foundMessages,
         },
       });
