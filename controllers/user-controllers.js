@@ -350,6 +350,7 @@ const checkPatient = async (req, res) => {
               return;
             }
           });
+          return;
         }
 
         if (fileExist.active === true) {
@@ -556,6 +557,7 @@ const checkPatient = async (req, res) => {
               return;
             }
           });
+          return;
         }
         if (fileExist.active === true) {
           console.log("in active check");
