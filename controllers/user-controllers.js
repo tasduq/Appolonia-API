@@ -694,6 +694,98 @@ const checkPatient = async (req, res) => {
   }
 };
 
+const createUserAndAdminChat = async (
+  senderId,
+  receiverId,
+  message,
+  scanId,
+  format
+) => {
+  let conversations = await Conversation.find({
+    members: { $in: [senderId] },
+  });
+
+  let foundConversation = false;
+  let foundConversationId;
+  let i = 0;
+  while (i < conversations?.length && foundConversation === false) {
+    foundConversation = conversations[i].members.some(
+      (member) => member === receiverId
+    );
+    if (foundConversation === true) {
+      foundConversationId = conversations[i]._id;
+    }
+    i++;
+  }
+
+  if (foundConversation === true) {
+    console.log("conversation already exist");
+    return;
+  }
+  let membersData = await User.find({ _id: { $in: [senderId, receiverId] } }, [
+    "firstName",
+    "lastName",
+    "image",
+  ]);
+
+  membersData = membersData.map((member) => {
+    return {
+      name: `${member.firstName} ${member.lastName}`,
+      id: member._id,
+      image: member.image,
+    };
+  });
+  console.log(membersData);
+
+  let createdConversation = new Conversation({
+    members: [senderId, receiverId],
+    membersData: membersData,
+  });
+  try {
+    createdConversation.save((err, doc) => {
+      if (err) {
+        throw new Error("Error Creating the Chat");
+      } else {
+        console.log(doc, "doc there");
+
+        let createdMessage = new Message({
+          conversationId: doc._id,
+          senderId: senderId,
+          message: message,
+          format: format,
+          scanId: "",
+        });
+
+        createdMessage.save((err) => {
+          if (err) {
+            throw new Error("Error Creating the message");
+          } else {
+            // res.json({
+            //   serverError: 0,
+            //   message: "Message Sent",
+            //   data: {
+            //     success: 1,
+            //   },
+            // });
+            console.log("msg sent");
+            return;
+          }
+        });
+      }
+    });
+  } catch (err) {
+    // res.json({
+    //   serverError: 1,
+    //   message: err.message,
+    //   data: {
+    //     success: 0,
+    //   },
+    // });
+    console.log(err.message);
+    return;
+  }
+};
+
 const signup = async (req, res, next) => {
   const {
     firstName,
@@ -893,10 +985,21 @@ const signup = async (req, res, next) => {
                         activeRequested: true,
                       },
                     },
-                    (err) => {
+                    async (err) => {
                       if (err) {
                         throw new Error("Error creating the User");
                       } else {
+                        let adminFound = User.findOne({ role: "3" }, "_id");
+                        let clinic = Settings.find({}, "clinicName");
+                        let [adminFoundResolved, clinicResolved] =
+                          await Promise.all([adminFound, clinic]);
+                        createUserAndAdminChat(
+                          adminFoundResolved?._id?.toString(),
+                          userDoc._id?.toString(),
+                          `Welcome to ${clinicResolved[0]?.clinicName}. Ask us anything`,
+                          "",
+                          "text"
+                        );
                         res.json({
                           serverError: 0,
                           message:

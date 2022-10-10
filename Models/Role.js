@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 
 const roleSchema = new Schema({
   roleName: { type: String, required: true },
+  roleId: { type: String },
   created: {
     type: Date,
     default: Date.now,
