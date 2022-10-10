@@ -1083,7 +1083,7 @@ const emailVerify = async (req, res) => {
   let user;
 
   try {
-    user = await Filephoneverified.findOne({ fileId: fileId }, "otp");
+    user = await Filephoneverified.findOne({ fileId: fileId });
     console.log(user);
     if (user) {
       if (user.expires > Date.now()) {
