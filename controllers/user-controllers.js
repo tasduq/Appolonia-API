@@ -357,6 +357,8 @@ const checkPatient = async (req, res) => {
           const createdFilephoneverification = new Filephoneverified({
             otp: otp,
             fileId: fileExist._id,
+            created: Date.now(),
+            expires: Date.now() + 600000,
           });
 
           createdFilephoneverification.save((err) => {
@@ -563,6 +565,8 @@ const checkPatient = async (req, res) => {
           const createdFilephoneverification = new Filephoneverified({
             otp: otp,
             fileId: fileExist._id,
+            created: Date.now(),
+            expires: Date.now() + 600000,
           });
 
           createdFilephoneverification.save((err) => {
@@ -865,6 +869,8 @@ const signup = async (req, res, next) => {
               const createdFilephoneverification = new Filephoneverified({
                 otp: otp,
                 fileId: latestFile._id,
+                created: Date.now(),
+                expires: Date.now() + 600000,
               });
 
               createdFilephoneverification.save((err) => {
@@ -1242,7 +1248,7 @@ const login = async (req, res, next) => {
             );
           }
           // console.log(phoneExist);
-          let createdForgotOtp = await Filephoneverified({
+          let createdForgotOtp = new Filephoneverified({
             otp: otp,
             fileId: existingUser?._id,
             created: Date.now(),
@@ -1511,7 +1517,7 @@ const login = async (req, res, next) => {
             );
           }
           // console.log(phoneExist);
-          let createdForgotOtp = await Filephoneverified({
+          let createdForgotOtp = new Filephoneverified({
             otp: otp,
             fileId: existingUser?._id,
             created: Date.now(),
@@ -1771,7 +1777,7 @@ const sendOtpIfPhoneNotVerified = async (fileId) => {
       });
     }
     console.log(phoneExist);
-    let createdForgotOtp = await Filephoneverified({
+    let createdForgotOtp = new Filephoneverified({
       otp: otp,
       fileId: fileId,
       created: Date.now(),
@@ -2084,7 +2090,7 @@ const requestNewOtp = async (req, res) => {
     });
   }
   console.log(phoneExist);
-  let createdForgotOtp = await Filephoneverified({
+  let createdForgotOtp = new Filephoneverified({
     otp: otp,
     fileId: fileId,
     created: Date.now(),
@@ -2157,7 +2163,7 @@ const requestForgotOtp = async (req, res) => {
   }
 
   console.log(phoneExist);
-  let createdForgotOtp = await Forgotphoneverified({
+  let createdForgotOtp = new Forgotphoneverified({
     otp: otp,
     fileId: phoneExist._id,
     created: Date.now(),
