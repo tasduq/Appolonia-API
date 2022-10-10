@@ -301,39 +301,6 @@ const checkPatient = async (req, res) => {
         });
         return;
       } else {
-        if (fileExist.active === true) {
-          res.json({
-            serverError: 0,
-            message: "This account is already active. Try logging in",
-            data: {
-              success: 0,
-              isExisting: 1,
-              active: 1,
-              clinicVerified: 1,
-              activeRequested: 1,
-              phoneVerified: 1,
-            },
-          });
-          return;
-        }
-
-        if (fileExist.activeRequested === true) {
-          res.json({
-            serverError: 0,
-            message:
-              "You have already requested for the activation of the account",
-            data: {
-              success: 0,
-              isExisting: 1,
-              activeRequested: 1,
-              clinicVerified: 1,
-              active: 0,
-              phoneVerified: 1,
-            },
-          });
-          return;
-        }
-
         if (fileExist?.phoneVerified === false) {
           let foundForgotPhone = await Filephoneverified.findOne({
             fileId: fileExist._id,
@@ -375,7 +342,7 @@ const checkPatient = async (req, res) => {
                   clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
                   isExisting: 1,
                   active: 0,
-                  activeRequested: 0,
+                  activeRequested: fileExist?.activeRequested === true ? 1 : 0,
                   phoneVerified: 0,
                   otp: otp,
                 },
@@ -383,25 +350,58 @@ const checkPatient = async (req, res) => {
               return;
             }
           });
-        } else {
+        }
+
+        if (fileExist.active === true) {
           res.json({
             serverError: 0,
-            message:
-              fileExist?.clinicVerified === true
-                ? "Your account is verified try logging in"
-                : "We are still reviewing your details and will get back to you soon to activate account.",
+            message: "This account is already active. Try logging in",
             data: {
-              fileId: fileExist._id,
-              success: fileExist?.clinicVerified === true ? 1 : 0,
-              clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
+              success: 0,
               isExisting: 1,
-              active: fileExist?.active === true ? 1 : 0,
-              activeRequested: fileExist?.activeRequested === true ? 1 : 0,
+              active: 1,
+              clinicVerified: 1,
+              activeRequested: 1,
               phoneVerified: 1,
             },
           });
           return;
         }
+
+        if (fileExist.activeRequested === true) {
+          res.json({
+            serverError: 0,
+            message:
+              "You have already requested for the activation of the account",
+            data: {
+              success: 0,
+              isExisting: 1,
+              activeRequested: 1,
+              clinicVerified: 1,
+              active: 0,
+              phoneVerified: 1,
+            },
+          });
+          return;
+        }
+
+        res.json({
+          serverError: 0,
+          message:
+            fileExist?.clinicVerified === true
+              ? "Your account is verified try logging in"
+              : "We are still reviewing your details and will get back to you soon to activate account.",
+          data: {
+            fileId: fileExist._id,
+            success: fileExist?.clinicVerified === true ? 1 : 0,
+            clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
+            isExisting: 1,
+            active: fileExist?.active === true ? 1 : 0,
+            activeRequested: fileExist?.activeRequested === true ? 1 : 0,
+            phoneVerified: 1,
+          },
+        });
+        return;
 
         // if (
         //   fileExist.clinicVerified === true &&
@@ -507,41 +507,6 @@ const checkPatient = async (req, res) => {
         });
         return;
       } else {
-        if (fileExist.active === true) {
-          console.log("in active check");
-          res.json({
-            serverError: 0,
-            message: "This account is already active. Try logging in",
-            data: {
-              success: 0,
-              isExisting: 1,
-              active: 1,
-              clinicVerified: 1,
-              activeRequested: 1,
-              phoneVerified: 1,
-            },
-          });
-          return;
-        }
-
-        if (fileExist.activeRequested === true) {
-          console.log("in active requested");
-          res.json({
-            serverError: 0,
-            message:
-              "You have already requested for the activation of the account",
-            data: {
-              success: 0,
-              isExisting: 1,
-              activeRequested: 1,
-              clinicVerified: 1,
-              active: 0,
-              phoneVerified: 1,
-            },
-          });
-          return;
-        }
-
         if (fileExist?.phoneVerified === false) {
           let foundForgotPhone = await Filephoneverified.findOne({
             fileId: fileExist._id,
@@ -583,7 +548,7 @@ const checkPatient = async (req, res) => {
                   clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
                   isExisting: 1,
                   active: 0,
-                  activeRequested: 0,
+                  activeRequested: fileExist?.activeRequested === true ? 1 : 0,
                   phoneVerified: 0,
                   otp: otp,
                 },
@@ -591,25 +556,59 @@ const checkPatient = async (req, res) => {
               return;
             }
           });
-        } else {
+        }
+        if (fileExist.active === true) {
+          console.log("in active check");
           res.json({
             serverError: 0,
-            message:
-              fileExist?.clinicVerified === true
-                ? "Your account is verified try logging in"
-                : "We are still reviewing your details and will get back to you soon to activate account.",
+            message: "This account is already active. Try logging in",
             data: {
-              fileId: fileExist._id,
-              success: fileExist?.clinicVerified === true ? 1 : 0,
-              clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
+              success: 0,
               isExisting: 1,
-              active: fileExist?.active === true ? 1 : 0,
-              activeRequested: fileExist?.activeRequested === true ? 1 : 0,
+              active: 1,
+              clinicVerified: 1,
+              activeRequested: 1,
               phoneVerified: 1,
             },
           });
           return;
         }
+
+        if (fileExist.activeRequested === true) {
+          console.log("in active requested");
+          res.json({
+            serverError: 0,
+            message:
+              "You have already requested for the activation of the account",
+            data: {
+              success: 0,
+              isExisting: 1,
+              activeRequested: 1,
+              clinicVerified: 1,
+              active: 0,
+              phoneVerified: 1,
+            },
+          });
+          return;
+        }
+
+        res.json({
+          serverError: 0,
+          message:
+            fileExist?.clinicVerified === true
+              ? "Your account is verified try logging in"
+              : "We are still reviewing your details and will get back to you soon to activate account.",
+          data: {
+            fileId: fileExist._id,
+            success: fileExist?.clinicVerified === true ? 1 : 0,
+            clinicVerified: fileExist?.clinicVerified === true ? 1 : 0,
+            isExisting: 1,
+            active: fileExist?.active === true ? 1 : 0,
+            activeRequested: fileExist?.activeRequested === true ? 1 : 0,
+            phoneVerified: 1,
+          },
+        });
+        return;
 
         // if (
         //   fileExist.clinicVerified === true &&
