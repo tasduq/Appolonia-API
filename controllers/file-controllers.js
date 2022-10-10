@@ -70,7 +70,7 @@ const getFileFamilyMembers = async (req, res) => {
       assignedDoctorName: "Testdoctor",
       role: member?.role,
       image: member?.image ? member?.image : "",
-      scans: userScans,
+      scans: [],
     };
   });
   let resolvedFamilyData = await Promise.all(yoo);
@@ -103,7 +103,7 @@ const connectMemberToFile = async (req, res, next) => {
   //   let foundFile = await File.
 
   File.findOneAndUpdate(
-    { _id: fileId, "familyMembers.memberEmiratesId": memberEmiratesId },
+    { _id: fileId, "familyMembers.uniqueId": memberEmiratesId },
     { $set: { "familyMembers.$.connected": true } },
     { new: true },
     (err, doc) => {

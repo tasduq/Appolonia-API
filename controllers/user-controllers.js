@@ -740,7 +740,7 @@ const signup = async (req, res, next) => {
           message: "This Emirates id already exist",
           data: {
             phoneVerified: 0,
-            isExisting: 0,
+            isExisting: 1,
             success: 0,
           },
         });
@@ -885,7 +885,7 @@ const signup = async (req, res, next) => {
                         familyMembers: {
                           memberEmiratesId: hashedemiratesId,
                           uniqueId: emiratesId,
-                          connected: false,
+                          connected: true,
                           userId: userDoc._id,
                         },
                       },
@@ -905,7 +905,7 @@ const signup = async (req, res, next) => {
                             fileId: latestFile._id,
                             otp: otp,
                             phoneVerified: 0,
-                            isExisting: 0,
+                            isExisting: 1,
                             success: 1,
                           },
                         });
@@ -981,7 +981,7 @@ const signup = async (req, res, next) => {
                 data: {
                   success: 1,
                   phoneVerified: fileExist.phoneVerified === true ? 1 : 0,
-                  isExisting: 0,
+                  isExisting: 1,
                 },
               });
               return;
@@ -1086,48 +1086,60 @@ const emailVerify = async (req, res) => {
     user = await Filephoneverified.findOne({ fileId: fileId }, "otp");
     console.log(user);
     if (user) {
-      if (user.otp === otp) {
-        File.updateOne(
-          { _id: fileId },
-          { $set: { phoneVerified: true } },
-          function (err) {
-            if (err) {
-              throw new Error(
-                "Somthing went wrong while verifiying Phone Number"
-              );
-            } else {
-              Filephoneverified.deleteOne({ fileId: fileId }, async (err) => {
-                if (err) {
-                  throw new Error("Error deleting the OTP Session");
-                } else {
-                  let foundFile = await File.findOne({ _id: fileId }, [
-                    "uniqueId",
-                    "city",
-                    "familyMembers",
-                    "emiratesId",
-                    "phoneNumber",
-                  ]);
+      if (user.expires > Date.now()) {
+        if (user.otp === otp) {
+          File.updateOne(
+            { _id: fileId },
+            { $set: { phoneVerified: true } },
+            function (err) {
+              if (err) {
+                throw new Error(
+                  "Somthing went wrong while verifiying Phone Number"
+                );
+              } else {
+                Filephoneverified.deleteOne({ fileId: fileId }, async (err) => {
+                  if (err) {
+                    throw new Error("Error deleting the OTP Session");
+                  } else {
+                    let foundFile = await File.findOne({ _id: fileId }, [
+                      "uniqueId",
+                      "city",
+                      "familyMembers",
+                      "emiratesId",
+                      "phoneNumber",
+                    ]);
 
-                  res.json({
-                    serverError: 0,
-                    message:
-                      "Thanks for verifying your Mobile Number. Our Team will be in touch soon to activate your account.",
-                    data: {
-                      fileId: foundFile._id,
-                      success: 1,
-                    },
-                  });
-                  return;
-                }
-              });
+                    res.json({
+                      serverError: 0,
+                      message:
+                        "Thanks for verifying your Mobile Number. Our Team will be in touch soon to activate your account.",
+                      data: {
+                        fileId: foundFile._id,
+                        success: 1,
+                      },
+                    });
+                    return;
+                  }
+                });
+              }
             }
-          }
-        );
+          );
+        } else {
+          // throw new Error("Otp is wrong");
+          res.json({
+            serverError: 0,
+            message:
+              "You have entered an Incorrect OTP Code, please try again.",
+            data: {
+              success: 0,
+            },
+          });
+          return;
+        }
       } else {
-        // throw new Error("Otp is wrong");
         res.json({
           serverError: 0,
-          message: "You have entered an Incorrect OTP Code, please try again.",
+          message: "OTP got expired. Kindly request the new one",
           data: {
             success: 0,
           },
@@ -2245,7 +2257,7 @@ const verifyForgotOtp = async (req, res) => {
   } else {
     // res.json({ success: false, message: "Kindly request the OTP Again" });
     res.json({
-      serverError: 0,
+      serverError: 1,
       message: "Kindly request the OTP Again",
       data: {
         success: 0,
