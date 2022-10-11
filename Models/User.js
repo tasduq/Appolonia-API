@@ -10,10 +10,6 @@ const userSchema = new Schema({
   phoneNumber: { type: String },
   countryCode: { type: String },
   emiratesId: { type: String },
-  // role: {
-  //   type: Schema.Types.ObjectId,
-  //   ref: "Role",
-  // },
   fileNumber: { type: String },
   gender: { type: String },
   city: { type: String },
@@ -29,7 +25,8 @@ const userSchema = new Schema({
   uniqueId1: { type: String }, //fil
   uniqueId2: { type: String }, //emi
   assignedDoctorId: { type: String },
-  // assignedDoctorName: { type: String },
+  assignedDoctorName: { type: String },
+  lastScan: { type: Date },
 });
 
 // userSchema.plugin(uniqueValidator);

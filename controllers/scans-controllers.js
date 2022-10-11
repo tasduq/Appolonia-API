@@ -19,6 +19,17 @@ const submitScans = async (req, res) => {
         if (err) {
           throw new Error("Error saving scans");
         } else {
+          User.updateOne(
+            { _id: userId },
+            { $set: { lastScan: new Date() } },
+            (err) => {
+              if (err) {
+                console.log(err);
+              } else {
+                console.log("user updated");
+              }
+            }
+          );
           res.json({
             serverError: 0,
             message: "Successfully saved scans",
