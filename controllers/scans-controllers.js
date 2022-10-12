@@ -6,13 +6,14 @@ const Scans = require("../Models/Scans");
 
 const submitScans = async (req, res) => {
   console.log(req.body);
-  const { userId, doctorId, scanImages } = req.body;
+  const { userId, doctorId, faceScanImages, teethScanImages } = req.body;
   try {
-    if ((userId, doctorId, scanImages)) {
+    if ((userId, doctorId, faceScanImages, teethScanImages)) {
       let createdScan = new Scans({
         userId,
         doctorId,
-        scanImages,
+        faceScanImages,
+        teethScanImages,
         created: Date.now(),
       });
       createdScan.save((err, doc) => {
@@ -36,7 +37,7 @@ const submitScans = async (req, res) => {
             data: {
               success: 1,
               scanId: doc?._id,
-              scanFirstImage: scanImages[0],
+              scanFirstImage: teethScanImages[0],
             },
           });
           return;
