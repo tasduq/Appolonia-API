@@ -1337,6 +1337,7 @@ const login = async (req, res, next) => {
             clinicVerified: 0,
             active: 0,
             activeRequested: 0,
+            isExisting: 0,
           },
         });
         return;
@@ -1383,6 +1384,7 @@ const login = async (req, res, next) => {
                     clinicVerified: 0,
                     active: 0,
                     activeRequested: 0,
+                    isExisting: 1,
                   },
                 });
               return;
@@ -1401,6 +1403,7 @@ const login = async (req, res, next) => {
                   active: existingUser?.active === true ? 1 : 0,
                   activeRequested:
                     existingUser?.activeRequested === true ? 1 : 0,
+                  isExisting: 1,
                 },
               });
               return;
@@ -1420,6 +1423,7 @@ const login = async (req, res, next) => {
               clinicVerified: 0,
               active: existingUser?.active === true ? 1 : 0,
               activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+              isExisting: 1,
             },
           });
           return;
@@ -1453,6 +1457,7 @@ const login = async (req, res, next) => {
               clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
               active: 0,
               activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+              isExisting: 1,
             },
           });
           return;
@@ -1481,6 +1486,7 @@ const login = async (req, res, next) => {
               clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
               active: existingUser?.active === true ? 1 : 0,
               activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+              isExisting: 1,
             },
           });
           return;
@@ -1570,6 +1576,7 @@ const login = async (req, res, next) => {
             clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
             active: existingUser?.active === true ? 1 : 0,
             activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+            isExisting: 1,
           },
         });
         return;
@@ -1586,6 +1593,7 @@ const login = async (req, res, next) => {
           clinicVerified: 0,
           active: 0,
           activeRequested: 0,
+          isExisting: 0,
         },
       });
       return;
@@ -1606,6 +1614,7 @@ const login = async (req, res, next) => {
             clinicVerified: 0,
             active: 0,
             activeRequested: 0,
+            isExisting: 0,
           },
         });
         return;
@@ -1652,6 +1661,7 @@ const login = async (req, res, next) => {
                     clinicVerified: 0,
                     active: 0,
                     activeRequested: 0,
+                    isExisting: 1,
                   },
                 });
               return;
@@ -1670,6 +1680,7 @@ const login = async (req, res, next) => {
                   active: existingUser?.active === true ? 1 : 0,
                   activeRequested:
                     existingUser?.activeRequested === true ? 1 : 0,
+                  isExisting: 1,
                 },
               });
               return;
@@ -1689,6 +1700,7 @@ const login = async (req, res, next) => {
               clinicVerified: 0,
               active: existingUser?.active === true ? 1 : 0,
               activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+              isExisting: 1,
             },
           });
           return;
@@ -1722,6 +1734,7 @@ const login = async (req, res, next) => {
               clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
               active: 0,
               activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+              isExisting: 1,
             },
           });
           return;
@@ -1749,6 +1762,7 @@ const login = async (req, res, next) => {
               clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
               active: existingUser?.active === true ? 1 : 0,
               activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+              isExisting: 1,
             },
           });
           return;
@@ -1831,6 +1845,7 @@ const login = async (req, res, next) => {
             clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
             active: existingUser?.active === true ? 1 : 0,
             activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+            isExisting: 1,
           },
         });
         return;
@@ -1847,6 +1862,7 @@ const login = async (req, res, next) => {
           clinicVerified: 0,
           active: 0,
           activeRequested: 0,
+          isExisting: 0,
         },
       });
       return;
