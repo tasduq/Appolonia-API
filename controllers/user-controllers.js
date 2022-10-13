@@ -1845,6 +1845,7 @@ const login = async (req, res, next) => {
             clinicVerified: existingUser?.clinicVerified === true ? 1 : 0,
             active: existingUser?.active === true ? 1 : 0,
             activeRequested: existingUser?.activeRequested === true ? 1 : 0,
+            // isExisting: 1,
             isExisting: 1,
           },
         });
