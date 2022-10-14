@@ -319,7 +319,7 @@ const checkPatient = async (req, res) => {
             );
           }
           // sendPhoneOtp(fileExist.phoneNumber, otp);
-          // sendEmailOtp(email, otp);
+          sendEmailOtp(email, otp);
 
           const createdFilephoneverification = new Filephoneverified({
             otp: otp,
@@ -526,7 +526,7 @@ const checkPatient = async (req, res) => {
             );
           }
           // sendPhoneOtp(fileExist.phoneNumber, otp);
-          // sendEmailOtp(email, otp);
+          sendEmailOtp(email, otp);
 
           const createdFilephoneverification = new Filephoneverified({
             otp: otp,
