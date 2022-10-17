@@ -907,6 +907,8 @@ const signup = async (req, res, next) => {
         fileNumber: "",
         uniqueId1: "",
         uniqueId2: emiratesId,
+        image:
+          "https://www.clipartmax.com/png/middle/344-3442642_clip-art-freeuse-library-profile-man-user-people-icon-icono-de-login.png",
       });
 
       const createdFile = new File({
@@ -1554,8 +1556,10 @@ const login = async (req, res, next) => {
           city: familyHead?.city,
           assignedDoctorId: familyHead?.assignedDoctorId
             ? familyHead?.assignedDoctorId
-            : "",
-          assignedDoctorName: "Testdoctor",
+            : "632c2f19f114bb4be6e1d226",
+          assignedDoctorName: familyHead?.assignedDoctorName
+            ? familyHead?.assignedDoctorName
+            : "Appolonia Admin",
           role: familyHead?.role,
           image: familyHead?.image ? familyHead?.image : "",
           scans: userScans,
@@ -1824,8 +1828,10 @@ const login = async (req, res, next) => {
           city: familyHead?.city,
           assignedDoctorId: familyHead?.assignedDoctorId
             ? familyHead?.assignedDoctorId
-            : "",
-          assignedDoctorName: "Testdoctor",
+            : "632c2f19f114bb4be6e1d226",
+          assignedDoctorName: familyHead?.assignedDoctorName
+            ? familyHead?.assignedDoctorName
+            : "Appolonia Admin",
           role: familyHead?.role,
           image: familyHead?.image ? familyHead?.image : "",
           scans: userScans,
@@ -2523,48 +2529,87 @@ const deleteAccount = async (req, res) => {
   }
 };
 
-const getAllDoctors = (req, res) => {
-  const doctors = [
-    {
-      _id: "1",
-      doctorName: "Tasadduq",
-      departmentNumber: "123",
-      role: "admin",
-    },
-    {
-      _id: "2",
-      doctorName: "Tasadduq Ali",
-      departmentNumber: "1234",
-      role: "doctor",
-    },
-    {
-      _id: "3",
-      doctorName: "Tasadduq Ali Khokhar",
-      departmentNumber: "12345",
-      role: "doctor",
-    },
-    {
-      _id: "4",
-      doctorName: "Sanju",
-      departmentNumber: "123456",
-      role: "doctor",
-    },
-    {
-      _id: "5",
-      doctorName: "Sanju Doctor",
-      departmentNumber: "1234567",
-      role: "doctor",
-    },
-  ];
+const getAllDoctors = async (req, res) => {
+  // const doctors = [
+  //   {
+  //     _id: "1",
+  //     doctorName: "Tasadduq",
+  //     departmentNumber: "123",
+  //     role: "admin",
+  //   },
+  //   {
+  //     _id: "2",
+  //     doctorName: "Tasadduq Ali",
+  //     departmentNumber: "1234",
+  //     role: "doctor",
+  //   },
+  //   {
+  //     _id: "3",
+  //     doctorName: "Tasadduq Ali Khokhar",
+  //     departmentNumber: "12345",
+  //     role: "doctor",
+  //   },
+  //   {
+  //     _id: "4",
+  //     doctorName: "Sanju",
+  //     departmentNumber: "123456",
+  //     role: "doctor",
+  //   },
+  //   {
+  //     _id: "5",
+  //     doctorName: "Sanju Doctor",
+  //     departmentNumber: "1234567",
+  //     role: "doctor",
+  //   },
+  // ];
 
-  res.json({
-    serverError: 0,
-    message: "Doctors Found",
-    data: {
-      doctors: doctors,
-      success: 1,
-    },
-  });
+  try {
+    let foundDoctors = User.find({ role: "2" }, [
+      "firstName",
+      "lastName",
+      "role",
+    ]);
+    let foundAdmin = User.find({ role: "3" }, [
+      "firstName",
+      "lastName",
+      "role",
+    ]);
+
+    let [foundDoctorsResolved, foundAdminResolved] = await Promise.all([
+      foundDoctors,
+      foundAdmin,
+    ]);
+
+    foundDoctors = [foundAdminResolved, ...foundDoctorsResolved];
+    if (foundDoctors.length > 0) {
+      res.json({
+        serverError: 0,
+        message: "Doctors Found",
+        data: {
+          doctors: foundDoctors,
+          success: 1,
+        },
+      });
+    } else {
+      res.json({
+        serverError: 0,
+        message: "Doctors Found",
+        data: {
+          doctors: doctors,
+          success: 1,
+        },
+      });
+    }
+  } catch (err) {
+    res.json({
+      serverError: 1,
+      message: err.message,
+      data: {
+        // doctors: doctors,
+        success: 0,
+      },
+    });
+  }
 };
 
 module.exports = {

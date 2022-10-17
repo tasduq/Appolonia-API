@@ -202,6 +202,8 @@ const addFamilyMember = async (req, res) => {
       fileNumber: hashedfileNumber,
       uniqueId1: fileNumber,
       uniqueId2: emiratesId,
+      image:
+        "https://www.clipartmax.com/png/middle/344-3442642_clip-art-freeuse-library-profile-man-user-people-icon-icono-de-login.png",
     });
 
     newMember.save((err, userDoc) => {
