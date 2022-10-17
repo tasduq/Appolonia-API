@@ -6,12 +6,14 @@ const Scans = require("../Models/Scans");
 
 const submitScans = async (req, res) => {
   console.log(req.body);
-  const { userId, doctorId, faceScanImages, teethScanImages } = req.body;
+  const { userId, doctorId, doctorName, faceScanImages, teethScanImages } =
+    req.body;
   try {
     if ((userId, doctorId, faceScanImages, teethScanImages)) {
       let createdScan = new Scans({
         userId,
         doctorId,
+        doctorName,
         faceScanImages,
         teethScanImages,
         created: Date.now(),
