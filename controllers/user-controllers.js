@@ -1541,8 +1541,17 @@ const login = async (req, res, next) => {
         console.log("i am head", familyHead);
 
         familyHead = await User.findOne({ _id: familyHead?.userId });
-        let userScans = await Scans.find({ userId: familyHead._id }).limit(5);
-        console.log(userScans, "i am scans");
+        let userScans = Scans.find({ userId: familyHead._id }).limit(5);
+        let adminFound = User.findOne({ role: "3" }, [
+          "firstName",
+          "lastName",
+          "role",
+        ]);
+        let [adminFoundResolved, userScansResolved] = await Promise.all([
+          adminFound,
+          userScans,
+        ]);
+        console.log(userScansResolved.length, "i am scans");
         familyHead = {
           _id: familyHead?._id,
           firstName: familyHead?.firstName,
@@ -1556,13 +1565,13 @@ const login = async (req, res, next) => {
           city: familyHead?.city,
           assignedDoctorId: familyHead?.assignedDoctorId
             ? familyHead?.assignedDoctorId
-            : "632c2f19f114bb4be6e1d226",
+            : adminFoundResolved?._id,
           assignedDoctorName: familyHead?.assignedDoctorName
             ? familyHead?.assignedDoctorName
-            : "Appolonia Admin",
+            : `${adminFoundResolved?.firstName} ${adminFoundResolved.lastName}`,
           role: familyHead?.role,
           image: familyHead?.image ? familyHead?.image : "",
-          scans: userScans,
+          scans: userScansResolved,
         };
 
         console.log(familyHead, "i am head");
@@ -1813,8 +1822,17 @@ const login = async (req, res, next) => {
         );
         familyHead = await User.findOne({ _id: familyHead?.userId });
         console.log("i am familyHead", familyHead);
-        let userScans = await Scans.find({ userId: familyHead?._id }).limit(5);
-        console.log(userScans, "i am scans");
+        let userScans = Scans.find({ userId: familyHead?._id }).limit(5);
+        let adminFound = User.findOne({ role: "3" }, [
+          "firstName",
+          "lastName",
+          "role",
+        ]);
+        let [adminFoundResolved, userScansResolved] = await Promise.all([
+          adminFound,
+          userScans,
+        ]);
+        console.log(userScansResolved.length, "i am scans");
         familyHead = {
           _id: familyHead?._id,
           firstName: familyHead?.firstName,
@@ -1828,13 +1846,13 @@ const login = async (req, res, next) => {
           city: familyHead?.city,
           assignedDoctorId: familyHead?.assignedDoctorId
             ? familyHead?.assignedDoctorId
-            : "632c2f19f114bb4be6e1d226",
+            : adminFoundResolved?._id,
           assignedDoctorName: familyHead?.assignedDoctorName
             ? familyHead?.assignedDoctorName
-            : "Appolonia Admin",
+            : `${adminFoundResolved?.firstName} ${adminFoundResolved.lastName}`,
           role: familyHead?.role,
           image: familyHead?.image ? familyHead?.image : "",
-          scans: userScans,
+          scans: userScansResolved,
         };
         console.log(familyHead, "i am head");
         res.json({
