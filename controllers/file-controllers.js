@@ -221,7 +221,7 @@ const addFamilyMember = async (req, res) => {
                 memberEmiratesId: hashedemiratesId,
                 uniqueId: emiratesId,
                 connected: false,
-                userId: userDoc._id,
+                userId: userDoc._id.toString(),
               },
             },
           },

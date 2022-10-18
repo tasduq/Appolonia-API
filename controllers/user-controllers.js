@@ -993,7 +993,7 @@ const signup = async (req, res, next) => {
                           memberEmiratesId: hashedemiratesId,
                           uniqueId: emiratesId,
                           connected: true,
-                          userId: userDoc._id,
+                          userId: userDoc._id.toString(),
                         },
                       },
                       $set: {
@@ -2250,7 +2250,13 @@ const changePassword = async (req, res) => {
 const requestNewOtp = async (req, res) => {
   console.log(req.body);
   const { fileId } = req.body;
-  let phoneExist = await File.findOne({ _id: fileId }, "phoneNumber");
+  let phoneExist = await File.findOne({ _id: fileId }, [
+    "phoneNumber",
+    "uniqueId",
+  ]);
+  console.log(phoneExist, "i am phoneExist");
+  let userFound = await User.findOne({ uniqueId2: phoneExist?.uniqueId });
+  console.log(userFound, "i am found user");
   if (!phoneExist) {
     res.json({
       serverError: 0,
@@ -2287,7 +2293,7 @@ const requestNewOtp = async (req, res) => {
     expires: Date.now() + 600000,
   });
 
-  createdForgotOtp.save((err) => {
+  createdForgotOtp.save(async (err) => {
     if (err) {
       console.log(err),
         res.json({
@@ -2300,6 +2306,11 @@ const requestNewOtp = async (req, res) => {
       return;
     } else {
       // sendPhoneOtp(phoneExist?.phoneNumber, otp);
+      try {
+        await sendEmailOtp(userFound?.email, otp);
+      } catch (err) {
+        console.log(err.message);
+      }
       res.json({
         serverError: 0,
         message: "OTP Sent to Phone Number",
@@ -2320,6 +2331,8 @@ const requestForgotOtp = async (req, res) => {
   console.log(req.body);
   const { phoneNumber } = req.body;
   let phoneExist = await File.findOne({ phoneNumber: phoneNumber });
+  let userFound = await User.findOne({ uniqueId2: phoneExist?.uniqueId });
+  console.log(userFound, "i am found user");
   if (!phoneExist) {
     res.json({
       serverError: 0,
@@ -2360,7 +2373,7 @@ const requestForgotOtp = async (req, res) => {
     expires: Date.now() + 600000,
   });
 
-  createdForgotOtp.save((err) => {
+  createdForgotOtp.save(async (err) => {
     if (err) {
       console.log(err),
         // res.json({
@@ -2376,6 +2389,11 @@ const requestForgotOtp = async (req, res) => {
         });
       return;
     } else {
+      try {
+        await sendEmailOtp(userFound?.email, otp);
+      } catch (err) {
+        console.log(err.message);
+      }
       res.json({
         serverError: 0,
         message:
@@ -2534,16 +2552,25 @@ const deleteAccount = async (req, res) => {
         } else {
           let yoo = foundFamilyIds.map(async (memberId) => {
             try {
+              // let memberConversations = await Conversation.find(
+              //   {
+              //     members: { $in: [memberId] },
+              //   },
+              //   "_id"
+              // );
+              // console.log(memberConversations, "i am memberconversations");
               let deletedConvo = Conversation.deleteMany({
                 members: { $in: [memberId] },
               });
               let deletedMessage = Message.deleteMany({ senderId: memberId });
               let deletedScans = Scans.deleteMany({ userId: memberId });
+              let deletedUser = User.deleteOne({ _id: memberId });
 
               let resolved = await Promise.all([
                 deletedConvo,
                 deletedMessage,
                 deletedScans,
+                deletedUser,
               ]);
               console.log(resolved, "this is resolved");
               return resolved;
@@ -2554,13 +2581,7 @@ const deleteAccount = async (req, res) => {
           try {
             let doneDeleting = await Promise.all(yoo);
             console.log(doneDeleting);
-            res.json({
-              serverError: 0,
-              message: "Data is deleted",
-              data: {
-                success: 1,
-              },
-            });
+            return true;
           } catch (err) {
             console.log(err);
             throw new Error("Something went wrong");
@@ -2568,6 +2589,19 @@ const deleteAccount = async (req, res) => {
         }
       }
     );
+    File.deleteOne({ _id: fileId }, (err) => {
+      if (err) {
+        throw new Error("Somthing went wrong while deleting data");
+      } else {
+        res.json({
+          serverError: 0,
+          message: "Your account has been deleted successfully",
+          data: {
+            success: 1,
+          },
+        });
+      }
+    });
   } catch (err) {
     console.log(err);
     res.json({
