@@ -319,7 +319,11 @@ const checkPatient = async (req, res) => {
             );
           }
           // sendPhoneOtp(fileExist.phoneNumber, otp);
-          sendEmailOtp(email, otp);
+          try {
+            await sendEmailOtp(email, otp);
+          } catch (err) {
+            console.log(err.message);
+          }
 
           const createdFilephoneverification = new Filephoneverified({
             otp: otp,
@@ -526,7 +530,11 @@ const checkPatient = async (req, res) => {
             );
           }
           // sendPhoneOtp(fileExist.phoneNumber, otp);
-          sendEmailOtp(email, otp);
+          try {
+            await sendEmailOtp(email, otp);
+          } catch (err) {
+            console.log(err.message);
+          }
 
           const createdFilephoneverification = new Filephoneverified({
             otp: otp,
@@ -959,7 +967,12 @@ const signup = async (req, res, next) => {
               }
 
               // sendPhoneOtp(phoneNumber, otp);
-              sendEmailOtp(email, otp);
+              // sendEmailOtp(email, otp);
+              try {
+                await sendEmailOtp(email, otp);
+              } catch (err) {
+                console.log(err.message);
+              }
 
               const createdFilephoneverification = new Filephoneverified({
                 otp: otp,
@@ -1172,21 +1185,30 @@ const sendEmailOtp = (email, otp) => {
     };
 
     // send mail with defined transport object
-    transporter.sendMail(mailOptions, async (error, info) => {
-      if (error) {
-        console.log(error, "I am error");
-        return error;
-      } else {
-        console.log("Message sent: %s", info.messageId);
-        console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
-      }
-    });
-    return true;
-  } else {
-    // res.status(401).json({ message: "Something went Wrong" });
-    console.log("There is problem");
-    return false;
+    // transporter.sendMail(mailOptions, async (error, info) => {
+    //   if (error) {
+    //     console.log(error, "I am error");
+    //     return error;
+    //   } else {
+    //     console.log("Message sent: %s", info.messageId);
+    //     console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+    //   }
+    // });
+    // return true;
+    return transporter.sendMail(mailOptions);
   }
+  // else {
+  //   // res.status(401).json({ message: "Something went Wrong" });
+  //   // console.log("There is problem");
+  //   // return false;
+  //   res.json({
+  //     serverError : 0,
+  //     message : "Somthing is missing otp or email",
+  //     data : {
+  //       success : 0,
+  //     }
+  //   })
+  // }
 };
 
 const emailVerify = async (req, res) => {
