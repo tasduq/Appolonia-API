@@ -69,7 +69,9 @@ const getFileFamilyMembers = async (req, res) => {
         : "",
       assignedDoctorName: "Testdoctor",
       role: member?.role,
-      image: member?.image ? member?.image : "",
+      image: member?.image
+        ? member?.image
+        : "https://www.clipartmax.com/png/middle/344-3442642_clip-art-freeuse-library-profile-man-user-people-icon-icono-de-login.png",
       scans: [],
     };
   });

@@ -1074,7 +1074,14 @@ const signup = async (req, res, next) => {
           {
             _id: fileId,
           },
-          { $set: { activeRequested: true, password: hashedpassword } },
+          {
+            $set: {
+              activeRequested: true,
+              password: hashedpassword,
+              image:
+                "https://www.clipartmax.com/png/middle/344-3442642_clip-art-freeuse-library-profile-man-user-people-icon-icono-de-login.png",
+            },
+          },
           (err) => {
             if (err) {
               throw new Error("Somthing went wrong while making request");
@@ -1570,7 +1577,9 @@ const login = async (req, res, next) => {
             ? familyHead?.assignedDoctorName
             : `${adminFoundResolved?.firstName} ${adminFoundResolved.lastName}`,
           role: familyHead?.role,
-          image: familyHead?.image ? familyHead?.image : "",
+          image: familyHead?.image
+            ? familyHead?.image
+            : "https://www.clipartmax.com/png/middle/344-3442642_clip-art-freeuse-library-profile-man-user-people-icon-icono-de-login.png",
           scans: userScansResolved,
         };
 
@@ -1851,7 +1860,9 @@ const login = async (req, res, next) => {
             ? familyHead?.assignedDoctorName
             : `${adminFoundResolved?.firstName} ${adminFoundResolved.lastName}`,
           role: familyHead?.role,
-          image: familyHead?.image ? familyHead?.image : "",
+          image: familyHead?.image
+            ? familyHead?.image
+            : "https://www.clipartmax.com/png/middle/344-3442642_clip-art-freeuse-library-profile-man-user-people-icon-icono-de-login.png",
           scans: userScansResolved,
         };
         console.log(familyHead, "i am head");
