@@ -1,6 +1,7 @@
 const express = require("express");
-
 const usersController = require("../controllers/user-controllers");
+const authCheck = require("../Middleware/authCheck");
+
 const multer = require("multer");
 const cloudinary = require("cloudinary").v2;
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
@@ -40,11 +41,11 @@ router.post("/verifyforgototp", usersController.verifyForgotOtp);
 router.post("/newpasswordforgot", usersController.newPassword);
 
 router.post("/contact", upload.array("files"), usersController.contact);
-router.post("/profileget", usersController.getUserdata);
-router.post("/changepassword", usersController.changePassword);
-router.post("/updateprofile", usersController.updateUserProfile);
+router.post("/profileget", authCheck, usersController.getUserdata);
+router.post("/changepassword", authCheck, usersController.changePassword);
+router.post("/updateprofile", authCheck, usersController.updateUserProfile);
 router.post("/deleteaccount", usersController.deleteAccount);
 
-router.get("/getalldoctors", usersController.getAllDoctors);
+router.get("/getalldoctors", authCheck, usersController.getAllDoctors);
 
 module.exports = router;

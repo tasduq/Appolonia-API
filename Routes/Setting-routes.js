@@ -1,4 +1,5 @@
 const express = require("express");
+const authCheck = require("../Middleware/authCheck");
 
 const settingController = require("../controllers/setting-controllers");
 
