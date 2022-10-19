@@ -2464,7 +2464,7 @@ const verifyForgotOtp = async (req, res) => {
 
 const contact = async (req, res) => {
   // console.log(req.files);
-  console.log(req.files);
+  console.log(req.files, "i am files");
 
   let filesName = [];
   if (req?.files?.length > 0) {
@@ -2472,7 +2472,7 @@ const contact = async (req, res) => {
     filesName = req.files.map((file) => file.path);
   }
 
-  console.log(req.body.name);
+  console.log(req.body);
   const {
     name,
     contactInfo,
@@ -2552,13 +2552,6 @@ const deleteAccount = async (req, res) => {
         } else {
           let yoo = foundFamilyIds.map(async (memberId) => {
             try {
-              // let memberConversations = await Conversation.find(
-              //   {
-              //     members: { $in: [memberId] },
-              //   },
-              //   "_id"
-              // );
-              // console.log(memberConversations, "i am memberconversations");
               let deletedConvo = Conversation.deleteMany({
                 members: { $in: [memberId] },
               });
