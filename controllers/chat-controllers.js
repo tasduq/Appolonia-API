@@ -48,7 +48,7 @@ const newChat = async (req, res) => {
     membersData = membersData.map((member) => {
       return {
         name: `${member.firstName} ${member.lastName}`,
-        id: member._id,
+        id: member._id.toString(),
         image: member.image,
       };
     });
@@ -125,7 +125,7 @@ const newChat = async (req, res) => {
             });
           } else {
             let createdMessage = new Message({
-              conversationId: doc._id,
+              conversationId: doc._id.toString(),
               senderId: senderId,
               message: message,
               format: format,
@@ -166,27 +166,29 @@ const newChat = async (req, res) => {
 };
 
 const getConversations = async (req, res) => {
-  console.log(req.body);
+  console.log(req.body, "i am body");
   try {
     let conversations = await Conversation.find({
       members: { $in: [req.body.userId] },
     });
 
     let conversationsFiltered = conversations.map((convo) => {
+      console.log(convo, "i am cnvo");
       return {
         conversationId: convo._id,
         otherMemberId: convo?.members?.find(
           (memberId) => memberId !== req.body.userId
         ),
         otherMemberData: convo.membersData.find((memberData) => {
-          return memberData.id !== req.body.userId;
+          console.log(memberData, "i am memberdata");
+          return memberData.id.toString() !== req.body.userId;
         }),
         createdAt: convo.createdAt,
         updatedAt: convo.updatedAt,
       };
     });
 
-    console.log(conversationsFiltered);
+    // console.log(conversationsFiltered);
 
     if (conversations?.length > 0) {
       res.json({
